@@ -11,7 +11,8 @@ import openpyxl
 import string
 from openpyxl import Workbook, load_workbook
 import logging.config
-from utility import sql_read
+import utils
+from Helper.sql_helper import *
 
 log = logging.getLogger(__name__)
 
@@ -54,8 +55,8 @@ class data_processor:
 
         exp_df = sql_read(self.sql_engine, f"SELECT \
                 B.SPURCode [SPUR ID],\
-                A.MinimumExperienceRequired [mimimumExperienceRequired],\
-                A.DesiredExperienceRequired [Desired Years Of experience],\
+                CAST(A.MinimumExperienceRequired AS VARCHAR(10)) AS mimimumExperienceRequired , \
+                CAST(A.DesiredExperienceRequired AS VARCHAR(10)) As 'Desired Years Of experience',\
                 A.Industry [Industry],\
                 A.Domain [Domain],\
                 A.JG [JG],\

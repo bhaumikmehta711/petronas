@@ -171,12 +171,12 @@ def spur_job_profile(
     license_df[license_df_obj.columns] = license_df_obj.apply(lambda x: x.str.strip())
     license_column = [x for x in license_df.columns if re.search("License", x, flags=re.I)][0]
 
-    # content_item_dict = pd.read_excel(content_item_file_path, sheet_name=None)
-    # LC_content_item_list = (
-    #     content_item_dict["ContentItem-Competency Edge"]
-    #     .loc[9:, "Content Type Name"]
-    #     .str.strip()
-    #     .apply(lambda x: " ".join(str(x).split()))
+    #content_item_dict = pd.read_excel(content_item_file_path, sheet_name=None)
+    #LC_content_item_list = (
+        #content_item_dict["ContentItem-Competency Edge"]
+         #.loc[9:, "Content Type Name"]
+         #.str.strip()
+         #.apply(lambda x: " ".join(str(x).split()))
     # )
     # # competency_tec_sheet = [
     # #     x for x in content_item_dict.keys() if re.search("ContentItem-Competency$", x, flags=re.I)
@@ -204,12 +204,12 @@ def spur_job_profile(
     #     .str.strip()
     #     .apply(lambda x: " ".join(str(x).split()))
     # )
-    # license_content_item_list = (
-    #     content_item_dict["ContentItem-License & Certif"]
-    #     .loc[10:, "Content Type Name"]
-    #     .str.strip()
-    #     .apply(lambda x: " ".join(str(x).split()))
-    # )
+    #license_content_item_list = (
+        #content_item_dict["ContentItem-License & Certif"]
+         #.loc[10:, "Content Type Name"]
+        #.str.strip()
+        #.apply(lambda x: " ".join(str(x).split()))
+     #)
 
     # WS_df = pd.read_excel(WS_path, sheet_name="Final for SPUR")
     # WS_df.loc[:, "Combined Job"] = (
@@ -1158,7 +1158,7 @@ def spur_job_profile(
         #         ProfileItem_Competency_TC.range((row, "L")).color = (255, 0, 0)
         #         ProfileItem_Competency_TC.range((row, "N")).color = (255, 0, 0)
 
-    def profile_item_degree(wb, degree_df, job_dat_dir, AreaOfStudy_content_item_list):
+    def profile_item_degree(wb, degree_df, job_dat_dir):#, AreaOfStudy_content_item_list):
         ProfileItem_Degree = wb.sheets[7]
         ProfileItem_Degree.range((12, "B"), (10000, "Q")).clear()
 
@@ -1263,11 +1263,11 @@ def spur_job_profile(
         ProfileItem_Degree.range((12, "F"), (row_end_degree_sheet, "F")).value = "'2021/11/01"
         ProfileItem_Degree.range((12, "G"), (row_end_degree_sheet, "G")).value = "'4712/12/31"
 
-        AreaOfStudy_content_item_list = AreaOfStudy_content_item_list.values.tolist()
-        AreaOfStudy_content_item_list = [x.strip() for x in AreaOfStudy_content_item_list]
-        for row in range(12, row_end_degree_sheet + 1):
-            if not ProfileItem_Degree.range((row, "O")).value in AreaOfStudy_content_item_list:
-                ProfileItem_Degree.range((row, "O")).color = (255, 0, 0)
+        #AreaOfStudy_content_item_list = AreaOfStudy_content_item_list.values.tolist()
+        #AreaOfStudy_content_item_list = [x.strip() for x in AreaOfStudy_content_item_list]
+        #for row in range(12, row_end_degree_sheet + 1):
+         #   if not ProfileItem_Degree.range((row, "O")).value in AreaOfStudy_content_item_list:
+            #    ProfileItem_Degree.range((row, "O")).color = (255, 0, 0)
             # if ProfileItem_Degree.range((row, "K")).value == None:
             #     ProfileItem_Degree.range((row, "K")).color = (255, 0, 0)
             #     ProfileItem_Degree.range((row, "Q")).color = (255, 0, 0)
@@ -1343,7 +1343,7 @@ def spur_job_profile(
             mode="w",
         )
 
-    def profile_item_membership(wb, membership_df, job_dat_dir, membership_content_item_list):
+    def profile_item_membership(wb, membership_df, job_dat_dir):#, membership_content_item_list):
         ProfileItem_Membership = wb.sheets[13]
         ProfileItem_Membership.range((12, "B"), (10000, "M")).clear()
 
@@ -1411,10 +1411,10 @@ def spur_job_profile(
             ]
             ProfileItem_Membership.range((12, "M")).value = formula_list
 
-            membership_content_item_list = membership_content_item_list.values.tolist()
-            for row in range(12, row_end_membership_sheet + 1):
-                if not ProfileItem_Membership.range((row, "E")).value in membership_content_item_list:
-                    ProfileItem_Membership.range((row, "E")).color = (255, 0, 0)
+            #membership_content_item_list = membership_content_item_list.values.tolist()
+            #for row in range(12, row_end_membership_sheet + 1):
+                #if not ProfileItem_Membership.range((row, "E")).value in membership_content_item_list:
+                   # ProfileItem_Membership.range((row, "E")).color = (255, 0, 0)
 
             # Drop competency with minimum proficiency = 0
             header = pd.DataFrame(ProfileItem_Membership.range("B2:M2").value).T
@@ -1447,7 +1447,7 @@ def spur_job_profile(
         else:
             pass
 
-    def profile_item_awards(wb, awards_df, job_dat_dir, awards_content_item_list):
+    def profile_item_awards(wb, awards_df, job_dat_dir):#, awards_content_item_list):
         ProfileItem_Awards = wb.sheets[9]
         ProfileItem_Awards.range((12, "B"), (10000, "N")).clear()
 
@@ -1514,10 +1514,10 @@ def spur_job_profile(
             ]
             ProfileItem_Awards.range((12, "N")).value = formula_list
 
-            awards_content_item_list = awards_content_item_list.values.tolist()
-            for row in range(12, row_end_awards_sheet + 1):
-                if not ProfileItem_Awards.range((row, "E")).value in awards_content_item_list:
-                    ProfileItem_Awards.range((row, "E")).color = (255, 0, 0)
+            #awards_content_item_list = awards_content_item_list.values.tolist()
+            #for row in range(12, row_end_awards_sheet + 1):
+                #if not ProfileItem_Awards.range((row, "E")).value in awards_content_item_list:
+                    #ProfileItem_Awards.range((row, "E")).color = (255, 0, 0)
 
             # Drop competency with minimum proficiency = 0
             header = pd.DataFrame(ProfileItem_Awards.range("B2:N2").value).T
@@ -1550,7 +1550,7 @@ def spur_job_profile(
         else:
             pass
 
-    def profile_item_license(wb, license_df, job_dat_dir, license_content_item_list):
+    def profile_item_license(wb, license_df, job_dat_dir):#, license_content_item_list):
         ProfileItem_License = wb.sheets[5]
         ProfileItem_License.range((12, "B"), (10000, "Q")).clear()
 
@@ -1619,7 +1619,7 @@ def spur_job_profile(
             ]
             ProfileItem_License.range((12, "Q")).value = formula_list
 
-            license_content_item_list = license_content_item_list.values.tolist()
+            #license_content_item_list = license_content_item_list.values.tolist()
 
             # Drop competency with minimum proficiency = 0
             header = pd.DataFrame(ProfileItem_License.range("B2:Q2").value).T
@@ -1640,9 +1640,9 @@ def spur_job_profile(
             ProfileItem_License.range((12, "F"), (row_end_license_sheet_2, "F")).value = "'2021/11/01"
             ProfileItem_License.range((12, "G"), (row_end_license_sheet_2, "G")).value = "'4712/12/31"
 
-            for row in range(12, row_end_license_sheet_2 + 1):
-                if not ProfileItem_License.range((row, "E")).value in license_content_item_list:
-                    ProfileItem_License.range((row, "E")).color = (255, 0, 0)
+            #for row in range(12, row_end_license_sheet_2 + 1):
+                #if not ProfileItem_License.range((row, "E")).value in license_content_item_list:
+                    #ProfileItem_License.range((row, "E")).color = (255, 0, 0)
 
             ProfileItem_License_df = pd.concat([header, ProfileItem_License_df])
             ProfileItem_License_df.to_csv(
@@ -1660,41 +1660,41 @@ def spur_job_profile(
     # log.info("[Job profile] Talent Profile")
     # talent_profile(wb, spur_df, experience_df, job_dat_dir)
 
-    log.info("[Job profile] Profile Relation")
-    profile_relation(wb, job_dat_dir)
+    #log.info("[Job profile] Profile Relation")
+    #profile_relation(wb, job_dat_dir)
 
-    log.info("[Job profile] Model Profile Info")
-    model_profile_info(wb, job_dat_dir)
+    #log.info("[Job profile] Model Profile Info")
+    #model_profile_info(wb, job_dat_dir)
 
-    log.info("[Job profile] Profile Attachment")
-    profile_attachment(wb, job_dat_dir)
+    #log.info("[Job profile] Profile Attachment")
+    #profile_attachment(wb, job_dat_dir)
 
     # log.info("[Job profile] Profile Item Other Descriptor")
     # profile_item_other_descriptor(wb, spur_df, job_dat_dir)
 
-    log.info("[Job profile] License & Certificate")
-    profile_item_license(wb, license_df, job_dat_dir, license_content_item_list)
+    #log.info("[Job profile] License & Certificate")
+    #profile_item_license(wb, license_df, job_dat_dir) #, license_content_item_list)
 
-    log.info("[Job profile] Degree")
-    profile_item_degree(wb, degree_df, job_dat_dir, AreaOfStudy_content_item_list)
+    #log.info("[Job profile] Degree")
+    #profile_item_degree(wb, degree_df, job_dat_dir)#, AreaOfStudy_content_item_list
 
-    log.info("[Job profile] Honors & Awards")
-    profile_item_awards(wb, awards_df, job_dat_dir, awards_content_item_list)
+    #log.info("[Job profile] Honors & Awards")
+    #profile_item_awards(wb, awards_df, job_dat_dir)#, awards_content_item_list)
 
-    log.info("[Job profile] Language")
-    profile_item_language(wb, job_dat_dir)
+    #log.info("[Job profile] Language")
+    #profile_item_language(wb, job_dat_dir)
 
-    log.info("[Job profile] Membership")
-    profile_item_membership(wb, membership_df, job_dat_dir, membership_content_item_list)
+    #log.info("[Job profile] Membership")
+    #profile_item_membership(wb, membership_df, job_dat_dir)#, membership_content_item_list)
 
-    log.info("[Job profile] Experience Required")
-    profile_item_exp_required(wb, experience_df, job_dat_dir)
+    #log.info("[Job profile] Experience Required")
+    #profile_item_exp_required(wb, experience_df, job_dat_dir)
 
-    log.info("[Job profile] Leadership Competency")
-    profile_item_competency_LC(wb, LC_file_path, job_dat_dir, LC_content_item_list)
+    #log.info("[Job profile] Leadership Competency")
+    #profile_item_competency_LC(wb, LC_file_path, job_dat_dir, LC_content_item_list)
 
-    log.info("[Job profile] Technical Competency")
-    profile_item_competency_TC(wb, TC_file_path, job_dat_dir, TC_content_item_list)
+    #log.info("[Job profile] Technical Competency")
+    #profile_item_competency_TC(wb, TC_file_path, job_dat_dir, TC_content_item_list)
 
     log.info("[Job profile] Profile Item Risk")
     profile_item_risk(wb, spur_df, job_dat_dir)

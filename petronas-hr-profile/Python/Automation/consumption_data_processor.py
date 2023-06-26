@@ -70,7 +70,7 @@ spur_df = sql_read(sql_engine, f'SELECT \
         A.SPURCode UR_CODE,\
         A.SPURName UR_NAME,\
         A.PurposeAndAccountability,\
-        A.Challenge,\
+        A.Challenge CHALLENGES,\
         A.Experience\
     FROM [dbo].[SPUR] A')
 
