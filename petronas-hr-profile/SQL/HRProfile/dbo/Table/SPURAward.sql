@@ -1,0 +1,16 @@
+﻿CREATE TABLE [dbo].[SPURAward]
+(
+	[SPURID] INT NOT NULL,
+	[AwardID] INT NOT NULL,
+	[Establishment] VARCHAR(500),
+	[Required] BIT,
+	[Importance] VARCHAR(50) NULL,
+	[JG] VARCHAR(50) NULL,
+	[CreatedBy] NVARCHAR(200),
+	[CreatedTimestamp] DATETIME,
+	[ModifiedBy] NVARCHAR(200),
+	[ModifiedTimestamp] DATETIME,
+	CONSTRAINT [PK_SPURAward_SPURID_AwardID] PRIMARY KEY ([SPURID], [AwardID]),
+	CONSTRAINT [FK_SPUR_SPURAward_SPURID] FOREIGN KEY ([SPURID]) REFERENCES [DBO].[SPUR]([SPURID]),
+	CONSTRAINT [FK_Language_SPURAward_AwardID] FOREIGN KEY ([AwardID]) REFERENCES [Master].[Award]([AwardID])
+)

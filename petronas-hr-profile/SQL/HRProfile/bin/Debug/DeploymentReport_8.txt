@@ -1,0 +1,24 @@
+﻿** Highlights
+     Tables that will be recreated with data migrated
+       [dbo].[Batch]
+     Clustered indexes that will be dropped
+       None
+     Clustered indexes that will be created
+       None
+     Possible data issues
+       The type for column BatchType in table [dbo].[Batch] is currently  VARCHAR (25) NOT NULL but is being changed to 
+         VARCHAR (20) NOT NULL. Data loss could occur and deployment may fail if the column contains data that is incompatible
+         with type  VARCHAR (20) NOT NULL.
+
+** User actions
+     Recreate table
+       [dbo].[Batch] (Table)
+
+** Supporting actions
+     Drop
+       [dbo].[FK_Batch_SPUR_BatchID] (Foreign Key)
+     Create
+       [dbo].[FK_Batch_SPUR_BatchID] (Foreign Key)
+
+The type for column BatchType in table [dbo].[Batch] is currently  VARCHAR (25) NOT NULL but is being changed to  VARCHAR (20) NOT NULL. Data loss could occur and deployment may fail if the column contains data that is incompatible with type  VARCHAR (20) NOT NULL.
+

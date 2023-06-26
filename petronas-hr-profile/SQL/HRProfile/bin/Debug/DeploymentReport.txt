@@ -1,0 +1,33 @@
+﻿** Highlights
+     Tables that will be recreated with data migrated
+       None
+     Clustered indexes that will be dropped
+       None
+     Clustered indexes that will be created
+       None
+     Possible data issues
+       None
+
+** User actions
+     Create
+       [Audit] (Schema)
+       [Master] (Schema)
+       [Master].[Role] (Table)
+       [Master].[User] (Table)
+       [Master].[EmailTemplate] (Table)
+       [Master].[UserRole] (Table)
+       [dbo].[Batch] (Table)
+       [dbo].[SPUR] (Table)
+       [Master].[DC_Role_ActiveFlag] (Default Constraint)
+       [Master].[DC_Role_ModifiedTimeStamp] (Default Constraint)
+       [Master].[DC_User_ActiveFlag] (Default Constraint)
+       [Master].[DC_User_ModifiedTimeStamp] (Default Constraint)
+       [Master].[DC_EmailTemplate_ActiveFlag] (Default Constraint)
+       [Master].[DC_EmailTemplate_ModifiedTimeStamp] (Default Constraint)
+       [Master].[DC_UserRole_ActiveFlag] (Default Constraint)
+       [Master].[DC_UserRole_ModifiedTimeStamp] (Default Constraint)
+       [Master].[FK_User_UserRole_UserID] (Foreign Key)
+       [Master].[FK_Role_UserRole_RoleID] (Foreign Key)
+       [dbo].[FK_Batch_SPUR_BatchID] (Foreign Key)
+
+** Supporting actions

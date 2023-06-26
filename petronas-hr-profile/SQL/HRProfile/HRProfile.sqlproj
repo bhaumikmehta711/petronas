@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>HRProfile</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{5d892fb9-39b4-4392-9c43-7b0defe443a7}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>HRProfile</RootNamespace>
+    <AssemblyName>HRProfile</AssemblyName>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="dbo" />
+    <Folder Include="Master" />
+    <Folder Include="Audit" />
+    <Folder Include="dbo\Table" />
+    <Folder Include="Master\Table" />
+    <Folder Include="Master\Schema" />
+    <Folder Include="PreDeploymentScript" />
+    <Folder Include="PreDeploymentScript\Archive" />
+    <Folder Include="PostDeploymentScript" />
+    <Folder Include="PostDeploymentScript\Archive" />
+    <Folder Include="Master\View" />
+    <Folder Include="Staging" />
+    <Folder Include="dbo\Procedure" />
+    <Folder Include="Audit\Table" />
+    <Folder Include="Audit\Schema" />
+    <Folder Include="Audit\Procedure" />
+    <Folder Include="Staging\Schema" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Master\Table\User.sql" />
+    <Build Include="Master\Table\Role.sql" />
+    <Build Include="Master\Table\UserRole.sql" />
+    <Build Include="Master\Table\EmailTemplate.sql" />
+    <Build Include="Master\Schema\Master.sql" />
+    <Build Include="DBO\Table\SPUR.sql" />
+    <Build Include="DBO\Table\Batch.sql" />
+    <Build Include="Master\Table\Competency.sql" />
+    <Build Include="Master\View\vUserRole.sql" />
+    <Build Include="dbo\Procedure\uspGetBatchForProcessing.sql" />
+    <None Include="PostDeploymentScript\AddEmailTemplate.sql" />
+    <Build Include="Audit\Schema\Audit.sql" />
+    <Build Include="Audit\Table\EmailTracking.sql" />
+    <Build Include="Audit\Procedure\uspAddEmail.sql" />
+    <Build Include="Staging\Schema\Staging.sql" />
+    <Build Include="Audit\Procedure\uspGetEmailData.sql" />
+    <Build Include="dbo\Table\Position.sql" />
+    <Build Include="Master\Table\Language.sql" />
+    <None Include="PostDeploymentScript\AddLanguage.sql" />
+    <Build Include="dbo\Table\SPURLanguage.sql" />
+    <Build Include="dbo\Table\PositionLanguage.sql" />
+    <Build Include="Master\Table\Degree.sql" />
+    <Build Include="dbo\Table\PositionDegree.sql" />
+    <None Include="PostDeploymentScript\AddDegree.sql" />
+    <Build Include="Master\Table\Membership.sql" />
+    <Build Include="dbo\Table\SPURDegree.sql" />
+    <Build Include="dbo\Table\SPURMembership.sql" />
+    <Build Include="dbo\Table\PositionMembership.sql" />
+    <None Include="PostDeploymentScript\AddMembership.sql" />
+    <Build Include="Master\Table\Award.sql" />
+    <Build Include="dbo\Table\SPURAward.sql" />
+    <Build Include="dbo\Table\PositionAward.sql" />
+    <None Include="PostDeploymentScript\AddAward.sql" />
+    <Build Include="Master\Table\License.sql" />
+    <Build Include="dbo\Table\SPURLicense.sql" />
+    <Build Include="dbo\Table\PositionLicense.sql" />
+    <None Include="PostDeploymentScript\AddLicense.sql" />
+    <Build Include="dbo\Table\SPURExperience.sql" />
+    <Build Include="dbo\Table\PositionExperience.sql" />
+    <Build Include="Master\Table\StudyArea.sql" />
+    <None Include="PostDeploymentScript\AddStudyArea.sql" />
+    <Build Include="Master\Table\Country.sql" />
+    <None Include="PostDeploymentScript\AddCountry.sql" />
+    <Build Include="Master\Table\School.sql" />
+    <None Include="PostDeploymentScript\AddSchool.sql" />
+    <Build Include="Master\Table\LeadershipCompetency.sql" />
+    <Build Include="Master\Table\TechnicalCompetency.sql" />
+    <None Include="PostDeploymentScript\AddTechnicalCompetency.sql" />
+    <None Include="PostDeploymentScript\LeadershipCompetency.sql" />
+    <Build Include="dbo\Table\SPURLeadershipCompetency.sql" />
+    <Build Include="dbo\Table\PositionLeadershipCompetency.sql" />
+    <Build Include="dbo\Table\SPURTechnicalCompetency.sql" />
+    <Build Include="dbo\Table\PositionTechnicalCompetency.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="PostDeploymentScript\AddUserRole.sql" />
+  </ItemGroup>
+</Project>

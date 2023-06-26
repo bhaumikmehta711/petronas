@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "HRProfile", "HRProfile\HRProfile.sqlproj", "{5D892FB9-39B4-4392-9C43-7B0DEFE443A7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5D892FB9-39B4-4392-9C43-7B0DEFE443A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D892FB9-39B4-4392-9C43-7B0DEFE443A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D892FB9-39B4-4392-9C43-7B0DEFE443A7}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{5D892FB9-39B4-4392-9C43-7B0DEFE443A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D892FB9-39B4-4392-9C43-7B0DEFE443A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D892FB9-39B4-4392-9C43-7B0DEFE443A7}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {465496C7-FA52-4407-9320-15A5631F9F80}
+	EndGlobalSection
+EndGlobal

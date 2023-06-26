@@ -1,0 +1,23 @@
+﻿** Highlights
+     Tables that will be recreated with data migrated
+       [Master].[UserRole]
+     Clustered indexes that will be dropped
+       None
+     Clustered indexes that will be created
+       None
+     Possible data issues
+       None
+
+** User actions
+     Recreate table
+       [Master].[UserRole] (Table)
+
+** Supporting actions
+     Drop
+       [Master].[DC_UserRole_ActiveFlag] (Default Constraint)
+       [Master].[DC_UserRole_ModifiedTimeStamp] (Default Constraint)
+       [Master].[FK_Role_UserRole_RoleID] (Foreign Key)
+       [Master].[FK_User_UserRole_UserID] (Foreign Key)
+     Create
+       [Master].[FK_Role_UserRole_RoleID] (Foreign Key)
+       [Master].[FK_User_UserRole_UserID] (Foreign Key)

@@ -1,0 +1,10 @@
+C:\Users\bhaumikmehta\source\repos\HRProfile\HRProfile\bin\Debug\HRProfile.dacpac
+C:\Users\bhaumikmehta\source\repos\HRProfile\HRProfile\bin\Debug\HRProfile.dll
+C:\Users\bhaumikmehta\source\repos\HRProfile\HRProfile\bin\Debug\HRProfile.pdb
+C:\Users\bhaumikmehta\source\repos\HRProfile\HRProfile\obj\Debug\HRProfile.sqlproj.AssemblyReference.cache
+C:\Users\bhaumikmehta\source\repos\HRProfile\HRProfile\obj\Debug\HRProfile.dll
+C:\Users\bhaumikmehta\source\repos\HRProfile\HRProfile\obj\Debug\HRProfile.pdb
+C:\Users\bhaumikmehta\source\repos\HRProfile\HRProfile\obj\Debug\Model.xml
+C:\Users\bhaumikmehta\source\repos\HRProfile\HRProfile\obj\Debug\refactor.xml
+C:\Users\bhaumikmehta\source\repos\HRProfile\HRProfile\obj\Debug\postdeploy.sql
+C:\Users\bhaumikmehta\source\repos\HRProfile\HRProfile\obj\Debug\predeploy.sql

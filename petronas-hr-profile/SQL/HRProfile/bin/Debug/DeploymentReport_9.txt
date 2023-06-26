@@ -1,0 +1,24 @@
+﻿** Highlights
+     Tables that will be recreated with data migrated
+       [dbo].[SPUR]
+     Clustered indexes that will be dropped
+       None
+     Clustered indexes that will be created
+       None
+     Possible data issues
+       The column [dbo].[Batch].[Approver] is being dropped, data loss could occur.
+
+** User actions
+     Alter
+       [dbo].[Batch] (Table)
+     Recreate table
+       [dbo].[SPUR] (Table)
+
+** Supporting actions
+     Drop
+       [dbo].[FK_Batch_SPUR_BatchID] (Foreign Key)
+     Create
+       [dbo].[FK_Batch_SPUR_BatchID] (Foreign Key)
+
+The column [dbo].[Batch].[Approver] is being dropped, data loss could occur.
+

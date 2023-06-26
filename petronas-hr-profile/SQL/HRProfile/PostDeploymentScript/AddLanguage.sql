@@ -1,0 +1,554 @@
+﻿SELECT * INTO #Language FROM (SELECT 'Afar' LanguageName UNION ALL
+SELECT 'Abkhazian' UNION ALL
+SELECT 'Achinese' UNION ALL
+SELECT 'Acoli' UNION ALL
+SELECT 'Adangme' UNION ALL
+SELECT 'Adyghe' UNION ALL
+SELECT 'Avestan' UNION ALL
+SELECT 'Afrikaans' UNION ALL
+SELECT 'Afro-Asiatic' UNION ALL
+SELECT 'Afrihili' UNION ALL
+SELECT 'Akan' UNION ALL
+SELECT 'Akkadian' UNION ALL
+SELECT 'Aleut' UNION ALL
+SELECT 'Algonquian languages' UNION ALL
+SELECT 'Amharic' UNION ALL
+SELECT 'Aragonese' UNION ALL
+SELECT 'English, Old' UNION ALL
+SELECT 'Apache languages' UNION ALL
+SELECT 'Arabic' UNION ALL
+SELECT 'Arabic (United Arab Emirates)' UNION ALL
+SELECT 'Arabic (Bahrain)' UNION ALL
+SELECT 'Arabic (Algeria)' UNION ALL
+SELECT 'Arabic (Egypt)' UNION ALL
+SELECT 'Arabic (Iraq)' UNION ALL
+SELECT 'Arabic (Jordan)' UNION ALL
+SELECT 'Arabic (Kuwait)' UNION ALL
+SELECT 'Arabic (Lebanon)' UNION ALL
+SELECT 'Arabic (Libyan Arab Jamahiriya)' UNION ALL
+SELECT 'Arabic (Morocco)' UNION ALL
+SELECT 'Arabic (Oman)' UNION ALL
+SELECT 'Arabic (Qatar)' UNION ALL
+SELECT 'Arabic (Saudi Arabia)' UNION ALL
+SELECT 'Arabic (Syrian Arab Republic)' UNION ALL
+SELECT 'Arabic (Tunisia)' UNION ALL
+SELECT 'Arabic (Yemen)' UNION ALL
+SELECT 'Aramaic' UNION ALL
+SELECT 'Araucanian' UNION ALL
+SELECT 'Arapaho' UNION ALL
+SELECT 'Artificial' UNION ALL
+SELECT 'Arawak' UNION ALL
+SELECT 'Assamese' UNION ALL
+SELECT 'American Sign Language' UNION ALL
+SELECT 'Asturian' UNION ALL
+SELECT 'Athapascan languages' UNION ALL
+SELECT 'Australian languages' UNION ALL
+SELECT 'Avaric' UNION ALL
+SELECT 'Awadhi' UNION ALL
+SELECT 'Aymara' UNION ALL
+SELECT 'Azerbaijani' UNION ALL
+SELECT 'Bashkir' UNION ALL
+SELECT 'Banda' UNION ALL
+SELECT 'Bamileke languages' UNION ALL
+SELECT 'Baluchi' UNION ALL
+SELECT 'Balinese' UNION ALL
+SELECT 'Basa' UNION ALL
+SELECT 'Baltic' UNION ALL
+SELECT 'Belarusian' UNION ALL
+SELECT 'Beja' UNION ALL
+SELECT 'Bemba' UNION ALL
+SELECT 'Berber' UNION ALL
+SELECT 'Bulgarian' UNION ALL
+SELECT 'Bahasa (Indonesian)' UNION ALL
+SELECT 'Bhojpuri' UNION ALL
+SELECT 'Bislama' UNION ALL
+SELECT 'Bikol' UNION ALL
+SELECT 'Bini' UNION ALL
+SELECT 'Siksika' UNION ALL
+SELECT 'Bambara' UNION ALL
+SELECT 'Bengali' UNION ALL
+SELECT 'Bantu' UNION ALL
+SELECT 'Breton' UNION ALL
+SELECT 'Braj' UNION ALL
+SELECT 'Bosnian' UNION ALL
+SELECT 'Batak (Indonesia)' UNION ALL
+SELECT 'Buriat' UNION ALL
+SELECT 'Buginese' UNION ALL
+SELECT 'Catalan' UNION ALL
+SELECT 'Caddo' UNION ALL
+SELECT 'Central American Indian' UNION ALL
+SELECT 'Carib' UNION ALL
+SELECT 'Caucasian' UNION ALL
+SELECT 'Chinese (Cantonese)' UNION ALL
+SELECT 'Chechen' UNION ALL
+SELECT 'Cebuano' UNION ALL
+SELECT 'Celtic' UNION ALL
+SELECT 'Chinese (Other)' UNION ALL
+SELECT 'Chibcha' UNION ALL
+SELECT 'Chagatai' UNION ALL
+SELECT 'Chuukese' UNION ALL
+SELECT 'Mari' UNION ALL
+SELECT 'Chinook jargon' UNION ALL
+SELECT 'Choctaw' UNION ALL
+SELECT 'Chipewyan' UNION ALL
+SELECT 'Cherokee' UNION ALL
+SELECT 'Cheyenne' UNION ALL
+SELECT 'Chinese (Mandarin)' UNION ALL
+SELECT 'Chamic languages' UNION ALL
+SELECT 'Corsican' UNION ALL
+SELECT 'Coptic' UNION ALL
+SELECT 'Creoles and pidgins, English based' UNION ALL
+SELECT 'Creoles and pidgins, French-based' UNION ALL
+SELECT 'Creoles and pidgins, Portuguese-based' UNION ALL
+SELECT 'Cree' UNION ALL
+SELECT 'Crimean Tatar' UNION ALL
+SELECT 'Creoles and pidgins' UNION ALL
+SELECT 'Chinese (Shanghai)' UNION ALL
+SELECT 'Kashubian' UNION ALL
+SELECT 'Church Slavic' UNION ALL
+SELECT 'Cushitic' UNION ALL
+SELECT 'Chuvash' UNION ALL
+SELECT 'Welsh' UNION ALL
+SELECT 'Czech' UNION ALL
+SELECT 'Danish' UNION ALL
+SELECT 'Dakota' UNION ALL
+SELECT 'Dargwa' UNION ALL
+SELECT 'Dayak' UNION ALL
+SELECT 'German' UNION ALL
+SELECT 'German (Austria)' UNION ALL
+SELECT 'German (Switzerland)' UNION ALL
+SELECT 'German (Germany)' UNION ALL
+SELECT 'German (Liechtenstein)' UNION ALL
+SELECT 'German (Luxembourg)' UNION ALL
+SELECT 'Delaware' UNION ALL
+SELECT 'Slave (Athapascan)' UNION ALL
+SELECT 'Dogrib' UNION ALL
+SELECT 'Dinka' UNION ALL
+SELECT 'Dogri' UNION ALL
+SELECT 'Dravidian' UNION ALL
+SELECT 'Duala' UNION ALL
+SELECT 'Dutch, Middle' UNION ALL
+SELECT 'Divehi' UNION ALL
+SELECT 'Dyula' UNION ALL
+SELECT 'Dzongkha' UNION ALL
+SELECT 'Ewe' UNION ALL
+SELECT 'Efik' UNION ALL
+SELECT 'Egyptian' UNION ALL
+SELECT 'Ekajuk' UNION ALL
+SELECT 'Greek' UNION ALL
+SELECT 'Elamite' UNION ALL
+SELECT 'English' UNION ALL
+SELECT 'English (Australia)' UNION ALL
+SELECT 'English (Belize)' UNION ALL
+SELECT 'English (Canada)' UNION ALL
+SELECT 'English (United Kingdom)' UNION ALL
+SELECT 'English (Ireland)' UNION ALL
+SELECT 'English (Jamaica)' UNION ALL
+SELECT 'English (New Zealand)' UNION ALL
+SELECT 'English (Philippines)' UNION ALL
+SELECT 'English (Trinidad and Tobago)' UNION ALL
+SELECT 'English (United States)' UNION ALL
+SELECT 'English (South Africa)' UNION ALL
+SELECT 'English (Zimbabwe)' UNION ALL
+SELECT 'English, Middle' UNION ALL
+SELECT 'Esperanto' UNION ALL
+SELECT 'Spanish' UNION ALL
+SELECT 'Spanish (Argentina)' UNION ALL
+SELECT 'Spanish (Bolivia)' UNION ALL
+SELECT 'Spanish (Chile)' UNION ALL
+SELECT 'Spanish (Colombia)' UNION ALL
+SELECT 'Spanish (Costa Rica)' UNION ALL
+SELECT 'Spanish (Dominican Republic)' UNION ALL
+SELECT 'Spanish (Ecuador)' UNION ALL
+SELECT 'Spanish (Spain)' UNION ALL
+SELECT 'Spanish (Guatemala)' UNION ALL
+SELECT 'Spanish (Honduras)' UNION ALL
+SELECT 'Spanish (Mexico)' UNION ALL
+SELECT 'Spanish (Nicaragua)' UNION ALL
+SELECT 'Spanish (Panama)' UNION ALL
+SELECT 'Spanish (Peru)' UNION ALL
+SELECT 'Spanish (Puerto Rico)' UNION ALL
+SELECT 'Spanish (Paraguay)' UNION ALL
+SELECT 'Spanish (El Salvador)' UNION ALL
+SELECT 'Spanish (Uruguay)' UNION ALL
+SELECT 'Spanish (Venezuela)' UNION ALL
+SELECT 'Estonian' UNION ALL
+SELECT 'Basque' UNION ALL
+SELECT 'Ewondo' UNION ALL
+SELECT 'Farsi (Persian)' UNION ALL
+SELECT 'Fang' UNION ALL
+SELECT 'Fanti' UNION ALL
+SELECT 'Fulah' UNION ALL
+SELECT 'Finnish' UNION ALL
+SELECT 'Finno-Ugrian' UNION ALL
+SELECT 'Fijian' UNION ALL
+SELECT 'Flemish' UNION ALL
+SELECT 'Faroese' UNION ALL
+SELECT 'Fon' UNION ALL
+SELECT 'French' UNION ALL
+SELECT 'French (Belgium)' UNION ALL
+SELECT 'French (Canada)' UNION ALL
+SELECT 'French (Switzerland)' UNION ALL
+SELECT 'French (France)' UNION ALL
+SELECT 'French (Luxembourg)' UNION ALL
+SELECT 'French (Monaco)' UNION ALL
+SELECT 'French, Middle' UNION ALL
+SELECT 'French, Old' UNION ALL
+SELECT 'Friulian' UNION ALL
+SELECT 'Frisian' UNION ALL
+SELECT 'Irish' UNION ALL
+SELECT 'Ga' UNION ALL
+SELECT 'Gayo' UNION ALL
+SELECT 'Gbaya' UNION ALL
+SELECT 'Gaelic' UNION ALL
+SELECT 'Germanic' UNION ALL
+SELECT 'Geez' UNION ALL
+SELECT 'Gilbertese' UNION ALL
+SELECT 'Gallegan' UNION ALL
+SELECT 'German, Middle High' UNION ALL
+SELECT 'Guarani' UNION ALL
+SELECT 'German, Old High' UNION ALL
+SELECT 'Gondi' UNION ALL
+SELECT 'Gorontalo' UNION ALL
+SELECT 'Gothic' UNION ALL
+SELECT 'Grebo' UNION ALL
+SELECT 'Greek, Ancient' UNION ALL
+SELECT 'Gujarati' UNION ALL
+SELECT 'Manx' UNION ALL
+SELECT 'Gwich''in' UNION ALL
+SELECT 'Hausa' UNION ALL
+SELECT 'Haida' UNION ALL
+SELECT 'Hawaiian' UNION ALL
+SELECT 'Hebrew' UNION ALL
+SELECT 'Hindi' UNION ALL
+SELECT 'Hiligaynon' UNION ALL
+SELECT 'Himachali' UNION ALL
+SELECT 'Hittite' UNION ALL
+SELECT 'Hmong' UNION ALL
+SELECT 'Hiri Motu' UNION ALL
+SELECT 'Croatian' UNION ALL
+SELECT 'Haitian' UNION ALL
+SELECT 'Hungarian' UNION ALL
+SELECT 'Hupa' UNION ALL
+SELECT 'Armenian' UNION ALL
+SELECT 'Herero' UNION ALL
+SELECT 'Indian (Kannada)' UNION ALL
+SELECT 'Iban' UNION ALL
+SELECT 'Indonesian' UNION ALL
+SELECT 'Interlingue' UNION ALL
+SELECT 'Igbo' UNION ALL
+SELECT 'Indian (Hindi)' UNION ALL
+SELECT 'Sichuan Yi' UNION ALL
+SELECT 'Ijo' UNION ALL
+SELECT 'Indian (Konkani)' UNION ALL
+SELECT 'Iloko' UNION ALL
+SELECT 'Indic' UNION ALL
+SELECT 'Indo-European' UNION ALL
+SELECT 'Ingush' UNION ALL
+SELECT 'Ido' UNION ALL
+SELECT 'Iranian' UNION ALL
+SELECT 'Iroquoian languages' UNION ALL
+SELECT 'Icelandic' UNION ALL
+SELECT 'Italian' UNION ALL
+SELECT 'Italian (Switzerland)' UNION ALL
+SELECT 'Italian (Italy)' UNION ALL
+SELECT 'Inuktitut' UNION ALL
+SELECT 'Japanese' UNION ALL
+SELECT 'Judeo-Persian' UNION ALL
+SELECT 'Judeo-Arabic' UNION ALL
+SELECT 'Javanese' UNION ALL
+SELECT 'Georgian' UNION ALL
+SELECT 'Kara-Kalpak' UNION ALL
+SELECT 'Kabyle' UNION ALL
+SELECT 'Kachin' UNION ALL
+SELECT 'Kamba' UNION ALL
+SELECT 'Karen' UNION ALL
+SELECT 'Kawi' UNION ALL
+SELECT 'Kabardian' UNION ALL
+SELECT 'Kongo' UNION ALL
+SELECT 'Khasi' UNION ALL
+SELECT 'Khoisan' UNION ALL
+SELECT 'Khotanese' UNION ALL
+SELECT 'Kiswahili' UNION ALL
+SELECT 'Kuanyama' UNION ALL
+SELECT 'Kazakh' UNION ALL
+SELECT 'Kalaallisut' UNION ALL
+SELECT 'Khmer' UNION ALL
+SELECT 'Kimbundu' UNION ALL
+SELECT 'Kannada' UNION ALL
+SELECT 'Korean' UNION ALL
+SELECT 'Konkani' UNION ALL
+SELECT 'Kosraean' UNION ALL
+SELECT 'Kpelle' UNION ALL
+SELECT 'Kanuri' UNION ALL
+SELECT 'Karachay-Balkar' UNION ALL
+SELECT 'Kru' UNION ALL
+SELECT 'Kurukh' UNION ALL
+SELECT 'Kashmiri' UNION ALL
+SELECT 'Kurdish' UNION ALL
+SELECT 'Kumyk' UNION ALL
+SELECT 'Kutenai' UNION ALL
+SELECT 'Komi' UNION ALL
+SELECT 'Cornish' UNION ALL
+SELECT 'Kirghiz' UNION ALL
+SELECT 'Ladino' UNION ALL
+SELECT 'Lahnda' UNION ALL
+SELECT 'Lamba' UNION ALL
+SELECT 'Luxembourgish' UNION ALL
+SELECT 'Lezghian' UNION ALL
+SELECT 'Ganda' UNION ALL
+SELECT 'Lithuanian' UNION ALL
+SELECT 'Lingala' UNION ALL
+SELECT 'Laotian' UNION ALL
+SELECT 'Mongo' UNION ALL
+SELECT 'Lozi' UNION ALL
+SELECT 'Latin' UNION ALL
+SELECT 'Luba-Katanga' UNION ALL
+SELECT 'Luba-Lulua' UNION ALL
+SELECT 'Luiseno' UNION ALL
+SELECT 'Lunda' UNION ALL
+SELECT 'Luo (Kenya and Tanzania)' UNION ALL
+SELECT 'Lushai' UNION ALL
+SELECT 'Latvian' UNION ALL
+SELECT 'Madurese' UNION ALL
+SELECT 'Magahi' UNION ALL
+SELECT 'Maithili' UNION ALL
+SELECT 'Makasar' UNION ALL
+SELECT 'Mandingo' UNION ALL
+SELECT 'Austronesian' UNION ALL
+SELECT 'Masai' UNION ALL
+SELECT 'Moksha' UNION ALL
+SELECT 'Mandar' UNION ALL
+SELECT 'Mende' UNION ALL
+SELECT 'Malagasy' UNION ALL
+SELECT 'Irish, Middle' UNION ALL
+SELECT 'Marshallese' UNION ALL
+SELECT 'Maori' UNION ALL
+SELECT 'Micmac' UNION ALL
+SELECT 'Minangkabau' UNION ALL
+SELECT 'Miscellaneous languages' UNION ALL
+SELECT 'Macedonian' UNION ALL
+SELECT 'Mon-Khmer' UNION ALL
+SELECT 'Malayalam' UNION ALL
+SELECT 'Mongolian' UNION ALL
+SELECT 'Manchu' UNION ALL
+SELECT 'Manipuri' UNION ALL
+SELECT 'Manobo languages' UNION ALL
+SELECT 'Moldavian' UNION ALL
+SELECT 'Mohawk' UNION ALL
+SELECT 'Mossi' UNION ALL
+SELECT 'Marathi' UNION ALL
+SELECT 'Malay' UNION ALL
+SELECT 'Malay (Brunei Darussalam)' UNION ALL
+SELECT 'Malay (Malaysia)' UNION ALL
+SELECT 'Maltese' UNION ALL
+SELECT 'Multiple languages' UNION ALL
+SELECT 'Munda languages' UNION ALL
+SELECT 'Creek' UNION ALL
+SELECT 'Marwari' UNION ALL
+SELECT 'Burmese' UNION ALL
+SELECT 'Mayan languages' UNION ALL
+SELECT 'Erzya' UNION ALL
+SELECT 'Nauru' UNION ALL
+SELECT 'Nahuatl' UNION ALL
+SELECT 'North American Indian' UNION ALL
+SELECT 'Neapolitan' UNION ALL
+SELECT 'Norwegian Bokmal' UNION ALL
+SELECT 'Ndebele, North' UNION ALL
+SELECT 'Low German' UNION ALL
+SELECT 'Nepali' UNION ALL
+SELECT 'Newari' UNION ALL
+SELECT 'Ndonga' UNION ALL
+SELECT 'Nias' UNION ALL
+SELECT 'Niger-Kordofanian' UNION ALL
+SELECT 'Niuean' UNION ALL
+SELECT 'Dutch' UNION ALL
+SELECT 'Dutch (Belgium)' UNION ALL
+SELECT 'Dutch (Netherlands)' UNION ALL
+SELECT 'Norwegian Nynorsk' UNION ALL
+SELECT 'Norwegian' UNION ALL
+SELECT 'Nogai' UNION ALL
+SELECT 'Norse, Old' UNION ALL
+SELECT 'Ndebele, South' UNION ALL
+SELECT 'Sotho, Northern' UNION ALL
+SELECT 'Nubian languages' UNION ALL
+SELECT 'Navajo' UNION ALL
+SELECT 'Chichewa' UNION ALL
+SELECT 'Nyamwezi' UNION ALL
+SELECT 'Nyankole' UNION ALL
+SELECT 'Nyoro' UNION ALL
+SELECT 'Nzima' UNION ALL
+SELECT 'Occitan' UNION ALL
+SELECT 'Ojibwa' UNION ALL
+SELECT 'Oromo' UNION ALL
+SELECT 'Oriya' UNION ALL
+SELECT 'Ossetian' UNION ALL
+SELECT 'Osage' UNION ALL
+SELECT 'Turkish, Ottoman' UNION ALL
+SELECT 'Otomian languages' UNION ALL
+SELECT 'Panjabi' UNION ALL
+SELECT 'Papuan' UNION ALL
+SELECT 'Pangasinan' UNION ALL
+SELECT 'Pahlavi' UNION ALL
+SELECT 'Pampanga' UNION ALL
+SELECT 'Papiamento' UNION ALL
+SELECT 'Palauan' UNION ALL
+SELECT 'Persian, Old' UNION ALL
+SELECT 'Philippine' UNION ALL
+SELECT 'Phoenician' UNION ALL
+SELECT 'Pali' UNION ALL
+SELECT 'Polish' UNION ALL
+SELECT 'Pohnpeian' UNION ALL
+SELECT 'Prakrit languages' UNION ALL
+SELECT 'Provencal, Old' UNION ALL
+SELECT 'Pushto' UNION ALL
+SELECT 'Portuguese' UNION ALL
+SELECT 'Portuguese (Brazil)' UNION ALL
+SELECT 'Portuguese (Portugal)' UNION ALL
+SELECT 'Quechua' UNION ALL
+SELECT 'Rajasthani' UNION ALL
+SELECT 'Rapanui' UNION ALL
+SELECT 'Rarotongan' UNION ALL
+SELECT 'Raeto-Romance' UNION ALL
+SELECT 'Rundi' UNION ALL
+SELECT 'Rumanian' UNION ALL
+SELECT 'Romance' UNION ALL
+SELECT 'Romany' UNION ALL
+SELECT 'Russian' UNION ALL
+SELECT 'Kinyarwanda' UNION ALL
+SELECT 'Sanskrit' UNION ALL
+SELECT 'Sandawe' UNION ALL
+SELECT 'Yakut' UNION ALL
+SELECT 'South American Indian' UNION ALL
+SELECT 'Salishan languages' UNION ALL
+SELECT 'Samaritan Aramaic' UNION ALL
+SELECT 'Sasak' UNION ALL
+SELECT 'Santali' UNION ALL
+SELECT 'Sardinian' UNION ALL
+SELECT 'Scots' UNION ALL
+SELECT 'Sindhi' UNION ALL
+SELECT 'Northern Sami' UNION ALL
+SELECT 'Selkup' UNION ALL
+SELECT 'Semitic' UNION ALL
+SELECT 'Sango' UNION ALL
+SELECT 'Irish, Old' UNION ALL
+SELECT 'Sign Languages' UNION ALL
+SELECT 'Shan' UNION ALL
+SELECT 'Swahili' UNION ALL
+SELECT 'Sidamo' UNION ALL
+SELECT 'Siouan languages' UNION ALL
+SELECT 'Sino-Tibetan' UNION ALL
+SELECT 'Slovak' UNION ALL
+SELECT 'Slovenian' UNION ALL
+SELECT 'Slavic' UNION ALL
+SELECT 'Samoan' UNION ALL
+SELECT 'Southern Sami' UNION ALL
+SELECT 'Sami languages' UNION ALL
+SELECT 'Lule Sami' UNION ALL
+SELECT 'Inari Sami' UNION ALL
+SELECT 'Skolt Sami' UNION ALL
+SELECT 'Shona' UNION ALL
+SELECT 'Soninke' UNION ALL
+SELECT 'Somali' UNION ALL
+SELECT 'Sogdian' UNION ALL
+SELECT 'Songhai' UNION ALL
+SELECT 'Albanian' UNION ALL
+SELECT 'Serbian' UNION ALL
+SELECT 'Serer' UNION ALL
+SELECT 'Swati' UNION ALL
+SELECT 'Nilo-Saharan' UNION ALL
+SELECT 'Sotho, Southern' UNION ALL
+SELECT 'Sundanese' UNION ALL
+SELECT 'Sukuma' UNION ALL
+SELECT 'Susu' UNION ALL
+SELECT 'Sumerian' UNION ALL
+SELECT 'Swedish' UNION ALL
+SELECT 'Swedish (Finland)' UNION ALL
+SELECT 'Swedish (Sweden)' UNION ALL
+SELECT 'Syriac' UNION ALL
+SELECT 'Tagalog (Philippines)' UNION ALL
+SELECT 'Tai' UNION ALL
+SELECT 'Telugu' UNION ALL
+SELECT 'Timne' UNION ALL
+SELECT 'Tereno' UNION ALL
+SELECT 'Tetum' UNION ALL
+SELECT 'Tajik' UNION ALL
+SELECT 'Thai' UNION ALL
+SELECT 'Tamil (India)' UNION ALL
+SELECT 'Tigre' UNION ALL
+SELECT 'Tiv' UNION ALL
+SELECT 'Turkmen' UNION ALL
+SELECT 'Tokelau' UNION ALL
+SELECT 'Tagalog' UNION ALL
+SELECT 'Tlingit' UNION ALL
+SELECT 'Tamil (Ceylon)' UNION ALL
+SELECT 'Tamashek' UNION ALL
+SELECT 'Tswana' UNION ALL
+SELECT 'Tonga (Tonga Islands)' UNION ALL
+SELECT 'Tonga (Nyasa)' UNION ALL
+SELECT 'Tok Pisin' UNION ALL
+SELECT 'Turkish' UNION ALL
+SELECT 'Tsonga' UNION ALL
+SELECT 'Tsimshian' UNION ALL
+SELECT 'Tatar' UNION ALL
+SELECT 'Tumbuka' UNION ALL
+SELECT 'Tupi languages' UNION ALL
+SELECT 'Altaic' UNION ALL
+SELECT 'Tuvalu' UNION ALL
+SELECT 'Twi (Ghana)' UNION ALL
+SELECT 'Tahitian' UNION ALL
+SELECT 'Tuvinian' UNION ALL
+SELECT 'Udmurt' UNION ALL
+SELECT 'Uighur' UNION ALL
+SELECT 'Ugaritic' UNION ALL
+SELECT 'Ukrainian' UNION ALL
+SELECT 'Umbundu' UNION ALL
+SELECT 'Undetermined' UNION ALL
+SELECT 'Urdu (Pakistan)' UNION ALL
+SELECT 'Uzbek' UNION ALL
+SELECT 'Vai' UNION ALL
+SELECT 'Venda' UNION ALL
+SELECT 'Vietnamese' UNION ALL
+SELECT 'Volapuk' UNION ALL
+SELECT 'Votic' UNION ALL
+SELECT 'Walloon' UNION ALL
+SELECT 'Wakashan languages' UNION ALL
+SELECT 'Walamo' UNION ALL
+SELECT 'Waray' UNION ALL
+SELECT 'Washo' UNION ALL
+SELECT 'Sorbian languages' UNION ALL
+SELECT 'Wolof' UNION ALL
+SELECT 'Kalmyk' UNION ALL
+SELECT 'Xhosa' UNION ALL
+SELECT 'Yao' UNION ALL
+SELECT 'Yapese' UNION ALL
+SELECT 'Yiddish' UNION ALL
+SELECT 'Yoruba' UNION ALL
+SELECT 'Yupik languages' UNION ALL
+SELECT 'Zhuang' UNION ALL
+SELECT 'Zapotec' UNION ALL
+SELECT 'Zenaga' UNION ALL
+SELECT 'Chinese' UNION ALL
+SELECT 'Chinese (China)' UNION ALL
+SELECT 'Chinese (Hong Kong)' UNION ALL
+SELECT 'Chinese (Macau)' UNION ALL
+SELECT 'Chinese (Singapore)' UNION ALL
+SELECT 'Chinese (Taiwan)' UNION ALL
+SELECT 'Zande' UNION ALL
+SELECT 'Zulu' UNION ALL
+SELECT 'Zuni') A
+
+DBCC CHECKIDENT ('[Master].[Language]', RESEED, 1);
+INSERT INTO [Master].[Language]
+(
+	[LanguageName],
+	[CreatedBy],
+	[CreatedTimestamp]
+)
+SELECT 
+	A.[LanguageName],
+	'Admin',
+	GETUTCDATE()
+FROM #Language A
+LEFT JOIN [Master].[Language] B ON B.LanguageName = A.LanguageName
+WHERE B.LanguageID IS NULL

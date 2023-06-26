@@ -1,0 +1,17 @@
+﻿** Highlights
+     Tables that will be recreated with data migrated
+       None
+     Clustered indexes that will be dropped
+       None
+     Clustered indexes that will be created
+       None
+     Possible data issues
+       None
+
+** User actions
+     Create
+       [Master].[Competency] (Table)
+       [Master].[DC_Competency_ActiveFlag] (Default Constraint)
+       [Master].[DC_Competency_ModifiedTimeStamp] (Default Constraint)
+
+** Supporting actions
