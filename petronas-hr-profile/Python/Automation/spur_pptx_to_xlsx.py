@@ -16,10 +16,7 @@ def pptx_to_xlsx(
     ppt_list,
     # xlsx_destination,
     save_slide,
-    job_blob_dir,
-    job_clob_dir,
-    position_blob_dir,
-    position_clob_dir,
+    job_blob_dir
 ):
     ppt_list = [x for x in ppt_list if not re.search(r"~\$", x)]
     log = logging.getLogger(__name__)

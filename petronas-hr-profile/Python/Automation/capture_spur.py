@@ -14,14 +14,14 @@ sql_engine = create_engine("mssql+pyodbc:///?autocommit=true&odbc_connect=%s" % 
 service_client = DataLakeServiceClient(account_url="{}://{}.dfs.core.windows.net".format("https", conf.storage_account_name), credential=conf.storage_account_key)
 
 #Capture non-processed batch
-pd_batch = sql_read(engine = sql_engine, query = 'EXEC [uspGetBatchForProcessing]')
+pd_batch = sql_read(engine = sql_engine, query = 'EXEC [uspGetBatchForProcessing] @pBatchType = \'SPUR\'')
 
 #Process each batch
 for index, row in pd_batch.iterrows():
     try:
         batch_id = row['BatchID']
         batch_name = row['BatchName']
-        pd_spur = pd.DataFrame(columns = ['SPUR_code', 'SPUR_name', 'SKG_name', 'SPUR_file_storage_account_path', 'purpose_and_accountability', 'challenge', 'experience'])
+        pd_spur = pd.DataFrame(columns = ['SPUR_code', 'SPUR_name', 'SKG_name', 'SPUR_file_storage_account_path', 'purpose_and_accountability', 'challenge', 'experience', 'KPI'])
         local_batch_dir = conf.main_local_dir + '/' + batch_name
 
         #Download files for a batch
@@ -36,10 +36,7 @@ for index, row in pd_batch.iterrows():
         pd_pptx = spur_pptx_to_xlsx.pptx_to_xlsx(
             ppt_list=ppt_list,
             save_slide=True,
-            job_blob_dir = local_batch_dir + '/Job_SPUR/BlobFiles',
-            job_clob_dir = '',
-            position_blob_dir= '',
-            position_clob_dir = '',
+            job_blob_dir = local_batch_dir + '/Job_SPUR/BlobFiles'
         )
 
 
@@ -47,17 +44,20 @@ for index, row in pd_batch.iterrows():
             SPUR_code = row['UR_CODE']
             SPUR_name = row['UR_NAME']
             SKG_name = SPUR_code.split('-')[1]
-            SPUR_file_storage_account_path = conf.management_job_spur_dir + '/SKG' + SKG_name + '/' + row['UR_CODE'] + '.pdf'
             purpose_and_accountability =  "<p>" + row["ROLEPURPOSE"].strip() + "</p>" + "\n\n\n" + row["ACCOUNTABILITIES"].strip()
             experience = row["EXPERIENCE"].strip()
             challenge = row["CHALLENGES"].strip()
-            local_file_path = local_batch_dir + '/Job_SPUR/BlobFiles/' + row['UR_CODE'] + '.pdf'
+            KPI = row["KPI"].strip()
+            file_name = row['UR_CODE'] + '.pdf'
+            local_file_path = local_batch_dir + '/Job_SPUR/BlobFiles/' + file_name
+            SPUR_file_storage_account_path = conf.management_job_spur_dir + '/SKG' + SKG_name
             
             uploaded_file = upload_to_adls(
                 service_client = service_client,
                 container = conf.management_container_name,
                 local_path = local_file_path,
-                remote_path= SPUR_file_storage_account_path
+                remote_path= SPUR_file_storage_account_path,
+                remote_file_name = file_name
             )[0]
 
             spur = {
@@ -92,15 +92,16 @@ for index, row in pd_batch.iterrows():
                     A.SPUR_file_storage_account_path, \
                     A.purpose_and_accountability, \
                     A.challenge, \
+                    A.KPI, \
                     A.experience \
                 FROM [Staging].[{batch_name}] A \
                 INNER JOIN [dbo].[Batch] B ON \'{batch_name}\' = B.BatchName) B\
-            ON A.SPURCode = B.SPUR_code\
+            ON 1 != 1\
             WHEN MATCHED THEN\
             UPDATE SET BatchID = B.BatchID, BackendUserModifiedBy = \'{conf.sql_user}\', BackendUserModifiedTimestamp = GETUTCDATE()\
             WHEN NOT MATCHED THEN\
-            INSERT (SPURCode, SPURName, BatchID, SPURFilePath, PurposeAndAccountability, Challenge, Experience, EndUserCreatedBy, SubmittedTimeStamp, EndUserCreatedTimestamp)\
-            VALUES (B.SPUR_code, B.SPUR_name, B.BatchID, B.SPUR_file_storage_account_path, B.purpose_and_accountability, B.challenge, B.experience, B.SubmittedBy, B.SubmittedTimeStamp, B.SubmittedTimeStamp);\
+            INSERT (SPURCode, SPURName, BatchID, SPURFilePath, PurposeAndAccountability, Challenge, Experience, KPI, EndUserCreatedBy, SubmittedTimeStamp, EndUserCreatedTimestamp)\
+            VALUES (B.SPUR_code, B.SPUR_name, B.BatchID, B.SPUR_file_storage_account_path, B.purpose_and_accountability, B.challenge, B.experience, B.KPI, B.SubmittedBy, B.SubmittedTimeStamp, B.SubmittedTimeStamp);\
             \
             EXEC [audit].[uspAddEmail] @pBatchID = {batch_id}\
             \
