@@ -32,6 +32,8 @@ position_blob_dir = position_dir + "\\" + "BlobFiles"
 position_clob_dir = position_dir + "\\" + "ClobFiles"
 position_dat_dir = position_dir + "\\" + "DatFiles"
 
+spur_details_file_path = data_dir + "\\" + "final_processed_data\\{}_details.xlsx".format(process_datetime)
+
 if not os.path.exists(consumption_dir):
     os.makedirs(consumption_dir)
     os.makedirs(data_dir)
@@ -61,13 +63,10 @@ downloaded_files = download_from_adls(
     local_dir = job_dir,
     new_file_name = f'PET_Job_SPUR_{process_datetime}.xlsx')
 
+#region SPUR
+#Load approved SPUR
+sql_execute(sql_engine, f'EXEC uspSPURGetBatchForConsumption {process_datetime}')
 
-#Load staging data
-spur_data_processor_sql.data_processor(
-    consumption_dir=consumption_dir,
-    process_datetime=process_datetime,
-    sql_engine = sql_engine
-).spur_data()
 spur_df = sql_read(sql_engine, f'SELECT \
         A.SPURCode UR_CODE,\
         A.SPURName UR_NAME,\
@@ -76,14 +75,19 @@ spur_df = sql_read(sql_engine, f'SELECT \
         ISNULL(A.Experience, \'\') Experience,\
         ISNULL(A.KPI, \'\') KPI,\
         A.SPURFilePath\
-    FROM [dbo].[SPUR] A')
+    FROM [dbo].[SPUR] A\
+    INNER JOIN [Staging].[{process_datetime}] B ON A.SPURID = B.SPURID')
 
-job_template_file_path = os.path.abspath(glob.glob(job_dir + "\\" + "*.xlsx")[0])
-spur_details_file_path = data_dir + "\\" + "final_processed_data\\{}_details.xlsx".format(process_datetime)
-
-# Create main files
 if not spur_df.empty:
+    #Load SPUR staging data
+    spur_data_processor_sql.data_processor(
+        consumption_dir=consumption_dir,
+        process_datetime=process_datetime,
+        sql_engine = sql_engine
+    ).spur_data()
+    job_template_file_path = os.path.abspath(glob.glob(job_dir + "\\" + "*.xlsx")[0])
 
+    #Create dat files
     spur_job_profile.spur_job_profile(
             process_datetime=process_datetime,
             job_template_file_path=job_template_file_path,
@@ -93,9 +97,10 @@ if not spur_df.empty:
             log_dir=log_dir,
         )
     
+    #Create blob files
     create_clob_file.create_clob_file(df = spur_df, clob_folder_path = job_clob_dir)
 
-    # #Upload files
+    #Upload dat and blob files
     uploaded_files = upload_to_adls(
             service_client = service_client,
             container = conf.consumption_container_name,
@@ -103,4 +108,15 @@ if not spur_df.empty:
             remote_path= datetime.now().strftime('%Y/%m/%d')
         )
 
+    #Copy clob files
     create_blob_file.create_blob_file(service_client = service_client, df = spur_df, destination_remote_path = datetime.now().strftime('%Y/%m/%d') + '/Job_SPUR/BlobFiles')
+
+sql_execute(sql_engine, f'UPDATE A\
+    SET \
+        A.BatchCompleteStatus = \'Completed\',\
+        A.BackendUserModifiedBy = \'{conf.sql_user}\',\
+        A.BackendUserModifiedTimeStamp = GETUTCDATE()\
+    FROM Batch A\
+    INNER JOIN Staging.[{process_datetime}] B ON A.BatchID = B.BatchID\
+    DROP TABLE Staging.[{process_datetime}]')
+#endregion
