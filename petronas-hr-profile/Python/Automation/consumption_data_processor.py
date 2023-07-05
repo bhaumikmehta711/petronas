@@ -57,16 +57,22 @@ if not os.path.exists(consumption_dir):
 
 
 #Download required documents
-downloaded_files = download_from_adls(
+download_from_adls(
     service_client = service_client, 
     container = conf.master_container_name, 
     remote_path = 'PET_Job SPUR.xlsx',
     local_dir = job_dir,
     new_file_name = f'PET_Job_SPUR_{process_datetime}.xlsx')
+download_from_adls(
+    service_client = service_client, 
+    container = conf.master_container_name, 
+    remote_path = 'PET_Position SPUR.xlsx',
+    local_dir = position_dir,
+    new_file_name = f'PET_Position_SPUR_{process_datetime}.xlsx')
 
 #region SPUR
 #Load approved SPUR
-sql_execute(sql_engine, f'EXEC uspSPURGetBatchForConsumption @pStagingTableName = \'SPUR_{process_datetime}\'')
+sql_execute(sql_engine, f'EXEC uspGetSPURBatchForConsumption @pStagingTableName = \'SPUR_{process_datetime}\'')
 
 spur_df = sql_read(sql_engine, f'SELECT * FROM [Staging].[SPUR_{process_datetime}]')
 
@@ -97,7 +103,7 @@ if not spur_df.empty:
             service_client = service_client,
             container = conf.consumption_container_name,
             local_path = job_dir,
-            remote_path= datetime.now().strftime('%Y/%m/%d')
+            remote_path= datetime.now().strftime('%Y/%m/%d') + '/Job_SPUR'
         )
 
     #Copy clob files
@@ -111,4 +117,54 @@ sql_execute(sql_engine, f'UPDATE A\
     FROM Batch A\
     INNER JOIN Staging.[SPUR_{process_datetime}] B ON A.BatchID = B.BatchID\
     DROP TABLE Staging.[SPUR_{process_datetime}]')
+#endregion
+
+
+#region Position
+#Load approved position
+sql_execute(sql_engine, f'EXEC uspGetPositionBatchForConsumption @pStagingTableName = \'Position{process_datetime}\'')
+
+position_df = sql_read(sql_engine, f'SELECT * FROM [Staging].[Position{process_datetime}]')
+
+if not position_df.empty:
+    #Load SPUR staging data
+    # spur_data_processor_sql.data_processor(
+    #     consumption_dir=consumption_dir,
+    #     process_datetime=process_datetime,
+    #     sql_engine = sql_engine
+    # ).spur_data()
+    # job_template_file_path = os.path.abspath(glob.glob(job_dir + "\\" + "*.xlsx")[0])
+
+    # #Create dat files
+    # spur_job_profile.spur_job_profile(
+    #         process_datetime=process_datetime,
+    #         job_template_file_path=job_template_file_path,
+    #         spur_df=spur_df,
+    #         spur_details_file_path=spur_details_file_path,
+    #         job_dat_dir=job_dat_dir,
+    #         log_dir=log_dir,
+    #     )
+    
+    #Create blob files
+    create_clob_file.create_clob_file(df = position_df, clob_folder_path = position_clob_dir)
+
+    #Upload dat and blob files
+    uploaded_files = upload_to_adls(
+            service_client = service_client,
+            container = conf.consumption_container_name,
+            local_path = position_dir,
+            remote_path= datetime.now().strftime('%Y/%m/%d') + '/Job_Position'
+        )
+
+    #Copy clob files
+    create_blob_file.create_blob_file(service_client = service_client, df = position_df, destination_remote_path = datetime.now().strftime('%Y/%m/%d') + '/Job_Position/BlobFiles')
+
+sql_execute(sql_engine, f'UPDATE A\
+    SET \
+        A.BatchCompleteStatus = \'Completed\',\
+        A.BackendUserModifiedBy = \'{conf.sql_user}\',\
+        A.BackendUserModifiedTimeStamp = GETUTCDATE()\
+    FROM Batch A\
+    INNER JOIN Staging.[Position_{process_datetime}] B ON A.BatchID = B.BatchID\
+    DROP TABLE Staging.[Position_{process_datetime}]')
 #endregion

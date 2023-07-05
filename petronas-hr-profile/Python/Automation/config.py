@@ -14,3 +14,4 @@ management_job_spur_dir = 'job_spur'
 management_container_name = 'management'
 
 sql_user = 'hradmin'
+theme_file_path = r'C:\Users\bhaumikmehta\OneDrive - Microsoft\Desktop\Project\Petronas\Debug\Master\PETRONAS.thmx'

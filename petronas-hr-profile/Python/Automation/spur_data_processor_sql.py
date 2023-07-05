@@ -31,13 +31,13 @@ class data_processor:
 
     def spur_data(self):
         license_df = sql_read(self.sql_engine, f"SELECT \
-                D.SPURCode [SPUR ID],\
+                E.SPURCode [SPUR ID],\
                 B.LicenseName [License & Certi (e.g. Transportation Management Certificate)],\
                 '' [if Other (Specific)], \
                 '' [JG],\
                 '' [Importance],\
                 C.CountryCode [Country],\
-                E.StateName [State],\
+                D.StateName [State],\
                 CASE WHEN A.Required = 1 THEN \'Y\' ELSE \'N\' END [Required] \
             FROM [SPURLicense] A \
             INNER JOIN [Master].[License] B ON A.LicenseID = B.LicenseID\
@@ -115,7 +115,7 @@ class data_processor:
             FROM [SPURAward] A \
             INNER JOIN [Master].[Award] B ON A.AwardID = B.AwardID\
             INNER JOIN [dbo].[SPUR] C ON C.SPURID = A.SPURID\
-            INNER JOIN [Staging].SPUR_[{self.process_datetime}] D ON D.SPURID = C.SPURID\
+            INNER JOIN [Staging].[SPUR_{self.process_datetime}] D ON D.SPURID = C.SPURID\
         ")
 
         leadership_competency_df = sql_read(self.sql_engine, f"SELECT \

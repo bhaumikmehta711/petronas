@@ -10,7 +10,7 @@ import shutil
 
 #Initialization
 sql_engine = create_engine("mssql+pyodbc:///?autocommit=true&odbc_connect=%s" % urllib.parse.quote_plus(conf.sql_connection_string))
-service_client = DataLakeServiceClient(account_url="{}://{}.dfs.core.windows.net".format("https", conf.storage_account_name), credential=conf.storage_account_key)
+
 
 #Capture non-processed batch
 pd_batch = sql_read(engine = sql_engine, query = 'EXEC [uspGetBatchForProcessing] @pBatchType = \'Position\'')
@@ -18,6 +18,8 @@ pd_batch = sql_read(engine = sql_engine, query = 'EXEC [uspGetBatchForProcessing
 #Process each batch
 for index, position in pd_batch.iterrows():
     try:
+        service_client = DataLakeServiceClient(account_url="{}://{}.dfs.core.windows.net".format("https", conf.storage_account_name), credential=conf.storage_account_key)
+
         batch_id = position['BatchID']
         batch_name = position['BatchName']
         pd_position = pd.DataFrame(columns = ['maintenance_mode', 'effective_start_date', 'effective_end_date', 'position_profile_code', 'SPUR_ID', 'position_name', 'job_grade', 'role_level', 'company_code'])
@@ -86,8 +88,8 @@ for index, position in pd_batch.iterrows():
                 WHEN MATCHED THEN\
                 UPDATE SET BatchID = B.BatchID, BackendUserModifiedBy = \'{conf.sql_user}\', BackendUserModifiedTimestamp = GETUTCDATE()\
                 WHEN NOT MATCHED THEN\
-                INSERT (MaintenanceMode, PositionCode, PositionName, EffectiveStartDate, EffectiveEndDate, SPURID, SPURCode, JobGradeID, RoleLevelID, CompanyCode, SubmittedTimeStamp, EndUserCreatedBy, EndUserCreatedTimestamp)\
-                VALUES (B.maintenance_mode, B.position_profile_code, B.position_name, B.effective_start_date, B.effective_end_date, B.SPUR_ID, B.SPUR_code, B.job_grade_id, B.role_level_id, B.company_code, B.SubmittedTimeStamp, B.SubmittedBy, B.SubmittedTimeStamp);\
+                INSERT (MaintenanceMode, PositionCode, PositionName, EffectiveStartDate, EffectiveEndDate, SPURID, SPURCode, JobGradeID, RoleLevelID, CompanyCode, BatchID, SubmittedTimeStamp, EndUserCreatedBy, EndUserCreatedTimestamp)\
+                VALUES (B.maintenance_mode, B.position_profile_code, B.position_name, B.effective_start_date, B.effective_end_date, B.SPUR_ID, B.SPUR_code, B.job_grade_id, B.role_level_id, B.company_code, B.BatchID, B.SubmittedTimeStamp, B.SubmittedBy, B.SubmittedTimeStamp);\
                 \
                 EXEC [dbo].[uspLoadPosition] @pBatchID = {batch_id}\
                 \
@@ -96,7 +98,8 @@ for index, position in pd_batch.iterrows():
                 DROP TABLE [Staging].[{batch_name}]'
             sql_execute(engine=sql_engine, query = sql_query)
 
-            # shutil.rmtree(local_batch_dir)
     except Exception as e:
         logging.error(f'Encountered error in create_spur.py: {str(e)}')
         raise ValueError(e)
+    finally:
+        shutil.rmtree(local_batch_dir)
