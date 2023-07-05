@@ -19,6 +19,7 @@ process_datetime = datetime.now().strftime('%Y%m%d%H%M')
 consumption_dir =  conf.main_local_dir + '\\' + process_datetime
 sql_engine = create_engine("mssql+pyodbc:///?autocommit=true&odbc_connect=%s" % urllib.parse.quote_plus(conf.sql_connection_string))
 service_client = DataLakeServiceClient(account_url="{}://{}.dfs.core.windows.net".format("https", conf.storage_account_name), credential=conf.storage_account_key)
+batch_list = []
 
 
 #Create dir
@@ -65,18 +66,9 @@ downloaded_files = download_from_adls(
 
 #region SPUR
 #Load approved SPUR
-sql_execute(sql_engine, f'EXEC uspSPURGetBatchForConsumption {process_datetime}')
+sql_execute(sql_engine, f'EXEC uspSPURGetBatchForConsumption @pStagingTableName = \'SPUR_{process_datetime}\'')
 
-spur_df = sql_read(sql_engine, f'SELECT \
-        A.SPURCode UR_CODE,\
-        A.SPURName UR_NAME,\
-        ISNULL(A.PurposeAndAccountability, \'\') PurposeAndAccountability,\
-        ISNULL(A.Challenge, \'\') Challenge,\
-        ISNULL(A.Experience, \'\') Experience,\
-        ISNULL(A.KPI, \'\') KPI,\
-        A.SPURFilePath\
-    FROM [dbo].[SPUR] A\
-    INNER JOIN [Staging].[{process_datetime}] B ON A.SPURID = B.SPURID')
+spur_df = sql_read(sql_engine, f'SELECT * FROM [Staging].[SPUR_{process_datetime}]')
 
 if not spur_df.empty:
     #Load SPUR staging data
@@ -117,6 +109,6 @@ sql_execute(sql_engine, f'UPDATE A\
         A.BackendUserModifiedBy = \'{conf.sql_user}\',\
         A.BackendUserModifiedTimeStamp = GETUTCDATE()\
     FROM Batch A\
-    INNER JOIN Staging.[{process_datetime}] B ON A.BatchID = B.BatchID\
-    DROP TABLE Staging.[{process_datetime}]')
+    INNER JOIN Staging.[SPUR_{process_datetime}] B ON A.BatchID = B.BatchID\
+    DROP TABLE Staging.[SPUR_{process_datetime}]')
 #endregion

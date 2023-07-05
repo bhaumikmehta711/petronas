@@ -44,7 +44,7 @@ class data_processor:
             INNER JOIN [Master].[Country] C ON A.CountryID = C.CountryID\
             INNER JOIN [Master].[State] D ON A.StateID = D.StateID\
             INNER JOIN [dbo].[SPUR] E ON E.SPURID = A.SPURID\
-            INNER JOIN [Staging].[{self.process_datetime}] F ON F.SPURID = E.SPURID\
+            INNER JOIN [Staging].[SPUR_{self.process_datetime}] F ON F.SPURID = E.SPURID\
         ")
 
         exp_df = sql_read(self.sql_engine, f"SELECT \
@@ -59,7 +59,7 @@ class data_processor:
             FROM [SPURExperience] A \
             INNER JOIN [SPUR] B ON A.SPURID = B.SPURID \
             INNER JOIN [Master].[RoleLevel] C ON C.RoleLevelID = B.RoleLevelID\
-            INNER JOIN [Staging].[{self.process_datetime}] D ON D.SPURID = B.SPURID\
+            INNER JOIN [Staging].[SPUR_{self.process_datetime}] D ON D.SPURID = B.SPURID\
         ")
 
         degree_df = sql_read(self.sql_engine, f"SELECT \
@@ -75,7 +75,7 @@ class data_processor:
             INNER JOIN [Master].[StudyArea] C ON C.StudyAreaID = A.StudyAreaID\
             INNER JOIN [Master].[Country] D ON D.CountryID = A.CountryID\
             INNER JOIN [dbo].[SPUR] E ON E.SPURID = A.SPURID\
-            INNER JOIN [Staging].[{self.process_datetime}] F ON F.SPURID = E.SPURID\
+            INNER JOIN [Staging].[SPUR_{self.process_datetime}] F ON F.SPURID = E.SPURID\
         ")
 
         membership_df = sql_read(self.sql_engine, f"SELECT \
@@ -87,7 +87,7 @@ class data_processor:
             FROM [SPURMembership] A \
             INNER JOIN [Master].[Membership] B ON A.MembershipID = B.MembershipID\
             INNER JOIN [dbo].[SPUR] C ON C.SPURID = A.SPURID\
-            INNER JOIN [Staging].[{self.process_datetime}] D ON D.SPURID = C.SPURID\
+            INNER JOIN [Staging].[SPUR_{self.process_datetime}] D ON D.SPURID = C.SPURID\
         ")
 
         language_df = sql_read(self.sql_engine, f"SELECT \
@@ -103,7 +103,7 @@ class data_processor:
             INNER JOIN [Master].[LanguageProficiency] D ON D.LanguageProficiencyID = A.WritingLanguageProficiencyID\
             INNER JOIN [Master].[LanguageProficiency] E ON E.LanguageProficiencyID = A.SpeakingLanguageProficiencyID\
             INNER JOIN [dbo].[SPUR] F ON F.SPURID = A.SPURID\
-            INNER JOIN [Staging].[{self.process_datetime}] G ON G.SPURID = F.SPURID\
+            INNER JOIN [Staging].[SPUR_{self.process_datetime}] G ON G.SPURID = F.SPURID\
         ")
 
         awards_df = sql_read(self.sql_engine, f"SELECT \
@@ -115,7 +115,7 @@ class data_processor:
             FROM [SPURAward] A \
             INNER JOIN [Master].[Award] B ON A.AwardID = B.AwardID\
             INNER JOIN [dbo].[SPUR] C ON C.SPURID = A.SPURID\
-            INNER JOIN [Staging].[{self.process_datetime}] D ON D.SPURID = C.SPURID\
+            INNER JOIN [Staging].SPUR_[{self.process_datetime}] D ON D.SPURID = C.SPURID\
         ")
 
         leadership_competency_df = sql_read(self.sql_engine, f"SELECT \
@@ -128,7 +128,7 @@ class data_processor:
             INNER JOIN [Master].[LeadershipCompetencyProficiency] C ON C.LeadershipCompetencyProficiencyID = A.MaximumLeadershipCompetencyProficiencyID\
             INNER JOIN [Master].[LeadershipCompetencyProficiency] D ON D.LeadershipCompetencyProficiencyID = A.MinimumLeadershipCompetencyProficiencyID\
             INNER JOIN [SPUR] E ON E.SPURID = A.SPURID\
-            INNER JOIN [Staging].[{self.process_datetime}] F ON F.SPURID = E.SPURID\
+            INNER JOIN [Staging].[SPUR_{self.process_datetime}] F ON F.SPURID = E.SPURID\
         ")
 
         technical_competency_df = sql_read(self.sql_engine, f"SELECT \
@@ -143,7 +143,7 @@ class data_processor:
             INNER JOIN [Master].[TechnicalCompetencyProficiency] D ON D.TechnicalCompetencyProficiencyID = A.MinimumTechnicalCompetencyProficiencyID\
 			INNER JOIN [Master].[CompetencyImportance] E ON E.CompetencyImportanceID = A.SPURTechnicalCompetencyID\
             INNER JOIN [SPUR] F ON F.SPURID = A.SPURID\
-            INNER JOIN [Staging].[{self.process_datetime}] G ON G.SPURID = F.SPURID")
+            INNER JOIN [Staging].[SPUR_{self.process_datetime}] G ON G.SPURID = F.SPURID")
 
         a = [
             (exp_df, "Experience"),

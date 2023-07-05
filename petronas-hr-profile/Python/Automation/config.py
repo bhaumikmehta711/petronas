@@ -9,6 +9,7 @@ master_container_name = 'master'
 consumption_container_name = 'consumption1'
 intake_container_name = 'intake'
 intake_job_spur_dir = 'spur'
+intake_job_position_dir = 'position'
 management_job_spur_dir = 'job_spur'
 management_container_name = 'management'
 
