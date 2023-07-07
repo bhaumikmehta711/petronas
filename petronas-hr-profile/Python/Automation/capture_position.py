@@ -35,7 +35,7 @@ for index, position in pd_batch.iterrows():
         position_writeups = downloaded_files
 
         for position_writeup in position_writeups:
-            pd_writeup = pd.read_excel(position_writeup, sheet_name='Position Profile Maintenance', skiprows=[1])
+            pd_writeup = pd.read_excel(position_writeup, sheet_name='Position Profile Maintenance', skiprows=[1], dtype = {'Company Code': str})
             for index, position in pd_writeup.iterrows():                
                 current_position = {}
                 current_position['maintenance_mode'] = position['Maintenance Mode']

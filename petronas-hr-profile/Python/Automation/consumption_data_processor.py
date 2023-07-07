@@ -3,11 +3,13 @@ from sqlalchemy import create_engine
 from azure.storage.filedatalake import DataLakeServiceClient
 import urllib
 import glob
+import spur_position_profile
 import spur_job_profile
 import os
 from datetime import datetime 
 import config as conf
 import spur_data_processor_sql
+import position_data_processor_sql
 from Helper.sql_helper import *
 from Helper.storage_account_helper import *
 from Helper.key_vault_helper import *
@@ -34,6 +36,7 @@ position_clob_dir = position_dir + "\\" + "ClobFiles"
 position_dat_dir = position_dir + "\\" + "DatFiles"
 
 spur_details_file_path = data_dir + "\\" + "final_processed_data\\{}_details.xlsx".format(process_datetime)
+spur_position_file_path = data_dir + "\\final_processed_data\\{}_position_profile_data.xlsx".format(process_datetime)
 
 if not os.path.exists(consumption_dir):
     os.makedirs(consumption_dir)
@@ -87,13 +90,13 @@ if not spur_df.empty:
 
     #Create dat files
     spur_job_profile.spur_job_profile(
-            process_datetime=process_datetime,
             job_template_file_path=job_template_file_path,
             spur_df=spur_df,
             spur_details_file_path=spur_details_file_path,
             job_dat_dir=job_dat_dir,
             log_dir=log_dir,
         )
+    os.rename(job_template_file_path, job_template_file_path.replace('_' + process_datetime, ''))
     
     #Create blob files
     create_clob_file.create_clob_file(df = spur_df, clob_folder_path = job_clob_dir)
@@ -105,7 +108,7 @@ if not spur_df.empty:
             local_path = job_dir,
             remote_path= datetime.now().strftime('%Y/%m/%d') + '/Job_SPUR'
         )
-
+    
     #Copy clob files
     create_blob_file.create_blob_file(service_client = service_client, df = spur_df, destination_remote_path = datetime.now().strftime('%Y/%m/%d') + '/Job_SPUR/BlobFiles')
 
@@ -122,28 +125,39 @@ sql_execute(sql_engine, f'UPDATE A\
 
 #region Position
 #Load approved position
-sql_execute(sql_engine, f'EXEC uspGetPositionBatchForConsumption @pStagingTableName = \'Position{process_datetime}\'')
+sql_execute(sql_engine, f'EXEC uspGetPositionBatchForConsumption @pStagingTableName = \'Position_{process_datetime}\'')
 
-position_df = sql_read(sql_engine, f'SELECT * FROM [Staging].[Position{process_datetime}]')
+position_df = sql_read(sql_engine, f'SELECT * FROM [Staging].[Position_{process_datetime}]')
 
 if not position_df.empty:
     #Load SPUR staging data
-    # spur_data_processor_sql.data_processor(
-    #     consumption_dir=consumption_dir,
-    #     process_datetime=process_datetime,
-    #     sql_engine = sql_engine
-    # ).spur_data()
-    # job_template_file_path = os.path.abspath(glob.glob(job_dir + "\\" + "*.xlsx")[0])
+    position_data_processor_sql.data_processor(
+        consumption_dir=consumption_dir,
+        process_datetime=process_datetime,
+        sql_engine = sql_engine
+    ).position_data()
+    position_template_file_path = os.path.abspath(glob.glob(job_dir + "\\" + "*.xlsx")[0])
 
-    # #Create dat files
-    # spur_job_profile.spur_job_profile(
-    #         process_datetime=process_datetime,
-    #         job_template_file_path=job_template_file_path,
-    #         spur_df=spur_df,
-    #         spur_details_file_path=spur_details_file_path,
-    #         job_dat_dir=job_dat_dir,
-    #         log_dir=log_dir,
-    #     )
+    #Create dat files
+    spur_position_profile.spur_position_profile(
+        position_blob_dir=position_blob_dir,
+        position_template_file_path=position_template_file_path,
+        position_profile_df = position_df,
+        position_details_file_path = spur_position_file_path,
+        spur_data_file_path='',
+        spur_details_file_path='',
+        spur_position_file_path=spur_position_file_path,
+        LC_file_path='',
+        TC_file_path='',
+        jcp_file_path='',
+        position_dat_dir=position_dat_dir,
+        SPUR_ID_ignore_list='',
+        content_item_file_path='',
+        read_jcp='',
+        WS_path='',
+        log_dir=log_dir,
+    )
+    os.rename(position_template_file_path, position_template_file_path.replace('_' + process_datetime, ''))
     
     #Create blob files
     create_clob_file.create_clob_file(df = position_df, clob_folder_path = position_clob_dir)

@@ -7,7 +7,6 @@ import os
 
 
 def spur_job_profile(
-    process_datetime,
     job_template_file_path,
     spur_df,
     spur_details_file_path,
@@ -296,13 +295,13 @@ def spur_job_profile(
             # for profile_code in talent_profile_df[2]:
             #     if profile_code not in WS_profile_code_list:
             #         profile_code_missing_list.append(profile_code)
-            if len(profile_code_missing_list) != 0:
-                logging.warning("[Data validation] {} job code missing".format(len(profile_code_missing_list)))
-                with open(log_dir + "\\" + f"{process_datetime}_job_code_missing.txt", "w") as f:
-                    f.write("\n".join("{}) ".format(i) + j for i, j in enumerate(profile_code_missing_list, start=1)))
-            else:
-                if f"{process_datetime}_profile_code_missing.txt" in log_dir_list:
-                    os.remove(log_dir + "\\" + f"{process_datetime}_profile_code_missing.txt")
+            # if len(profile_code_missing_list) != 0:
+            #     logging.warning("[Data validation] {} job code missing".format(len(profile_code_missing_list)))
+            #     with open(log_dir + "\\" + f"{process_datetime}_job_code_missing.txt", "w") as f:
+            #         f.write("\n".join("{}) ".format(i) + j for i, j in enumerate(profile_code_missing_list, start=1)))
+            # else:
+            #     if f"{process_datetime}_profile_code_missing.txt" in log_dir_list:
+            #         os.remove(log_dir + "\\" + f"{process_datetime}_profile_code_missing.txt")
             talent_profile_df = talent_profile_df[~talent_profile_df[2].isin(profile_code_missing_list)]
             # spur_name_map = dict(
             #     zip(
@@ -318,7 +317,7 @@ def spur_job_profile(
 
             talent_profile_df = pd.concat([header, talent_profile_df])
             talent_profile_df.to_csv(
-                job_dat_dir + "\\" + f"{process_datetime}_TalentProfile.dat",
+                job_dat_dir + "\\" + f"TalentProfile.dat",
                 header=None,
                 index=None,
                 sep="|",
@@ -367,7 +366,7 @@ def spur_job_profile(
 
             profile_relation_df = pd.concat([header, profile_relation_df])
             profile_relation_df.to_csv(
-                job_dat_dir + "\\" + f"{process_datetime}_ProfileRelation.dat",
+                job_dat_dir + "\\" + f"ProfileRelation.dat",
                 header=None,
                 index=None,
                 sep="|",
@@ -421,7 +420,7 @@ def spur_job_profile(
 
             ModelProfileExtraInfo_df = pd.concat([header, ModelProfileExtraInfo_df])
             ModelProfileExtraInfo_df.to_csv(
-                job_dat_dir + "\\" + f"{process_datetime}_ModelProfileExtraInfo.dat",
+                job_dat_dir + "\\" + f"ModelProfileExtraInfo.dat",
                 header=None,
                 index=None,
                 sep="|",
@@ -471,7 +470,7 @@ def spur_job_profile(
 
             ProfileAttachment_df = pd.concat([header, ProfileAttachment_df])
             ProfileAttachment_df.to_csv(
-                job_dat_dir + "\\" + f"{process_datetime}_ProfileAttachment.dat",
+                job_dat_dir + "\\" + f"ProfileAttachment.dat",
                 header=None,
                 index=None,
                 sep="|",
@@ -528,7 +527,7 @@ def spur_job_profile(
 
             ProfileItem_OtherDescriptor_df = pd.concat([header, ProfileItem_OtherDescriptor_df])
             ProfileItem_OtherDescriptor_df.to_csv(
-                job_dat_dir + "\\" + f"{process_datetime}_ProfileItem-OtherDescriptor.dat",
+                job_dat_dir + "\\" + f"ProfileItem-OtherDescriptor.dat",
                 header=None,
                 index=None,
                 sep="|",
@@ -586,7 +585,7 @@ def spur_job_profile(
 
             ProfileItem_Risk_df = pd.concat([header, ProfileItem_Risk_df])
             ProfileItem_Risk_df.to_csv(
-                job_dat_dir + "\\" + f"{process_datetime}_ProfileItem-Risk.dat",
+                job_dat_dir + "\\" + f"ProfileItem-Risk.dat",
                 header=None,
                 index=None,
                 sep="|",
@@ -770,7 +769,7 @@ def spur_job_profile(
 
             ProfileItem_ExperienceRequired_df = pd.concat([header, ProfileItem_ExperienceRequired_df])
             ProfileItem_ExperienceRequired_df.to_csv(
-                job_dat_dir + "\\" + f"{process_datetime}_ProfileItem-ExperienceRequired.dat",
+                job_dat_dir + "\\" + f"ProfileItem-ExperienceRequired.dat",
                 header=None,
                 index=None,
                 sep="|",
@@ -880,7 +879,7 @@ def spur_job_profile(
 
             ProfileItem_Competency_LC_df = pd.concat([header, ProfileItem_Competency_LC_df])
             ProfileItem_Competency_LC_df.to_csv(
-                job_dat_dir + "\\" + f"{process_datetime}_ProfileItem-Competency_LC.dat",
+                job_dat_dir + "\\" + f"ProfileItem-Competency_LC.dat",
                 header=None,
                 index=None,
                 sep="|",
@@ -1006,7 +1005,7 @@ def spur_job_profile(
 
             ProfileItem_Competency_TC_df = pd.concat([header, ProfileItem_Competency_TC_df])
             ProfileItem_Competency_TC_df.to_csv(
-                job_dat_dir + "\\" + f"{process_datetime}_ProfileItem-Competency_TC.dat",
+                job_dat_dir + "\\" + f"ProfileItem-Competency_TC.dat",
                 header=None,
                 index=None,
                 sep="|",
@@ -1150,7 +1149,7 @@ def spur_job_profile(
 
             ProfileItem_Degree_df = pd.concat([header, ProfileItem_Degree_df])
             ProfileItem_Degree_df.to_csv(
-                job_dat_dir + "\\" + f"{process_datetime}_ProfileItem-Degree.dat",
+                job_dat_dir + "\\" + f"ProfileItem-Degree.dat",
                 header=None,
                 index=None,
                 sep="|",
@@ -1249,7 +1248,7 @@ def spur_job_profile(
             ProfileItem_Language_df = pd.concat([header, ProfileItem_Language_df])
             print(ProfileItem_Language_df)
             ProfileItem_Language_df.to_csv(
-                job_dat_dir + "\\" + f"{process_datetime}_ProfileItem-Language.dat",
+                job_dat_dir + "\\" + f"ProfileItem-Language.dat",
                 header=None,
                 index=None,
                 sep="|",
@@ -1351,7 +1350,7 @@ def spur_job_profile(
 
                 ProfileItem_Membership_df = pd.concat([header, ProfileItem_Membership_df])
                 ProfileItem_Membership_df.to_csv(
-                    job_dat_dir + "\\" + f"{process_datetime}_ProfileItem-Membership.dat",
+                    job_dat_dir + "\\" + f"ProfileItem-Membership.dat",
                     header=None,
                     index=None,
                     sep="|",
@@ -1455,7 +1454,7 @@ def spur_job_profile(
 
                 ProfileItem_Awards_df = pd.concat([header, ProfileItem_Awards_df])
                 ProfileItem_Awards_df.to_csv(
-                    job_dat_dir + "\\" + f"{process_datetime}_ProfileItem-Awards.dat",
+                    job_dat_dir + "\\" + f"ProfileItem-Awards.dat",
                     header=None,
                     index=None,
                     sep="|",
@@ -1582,7 +1581,7 @@ def spur_job_profile(
 
                 ProfileItem_License_df = pd.concat([header, ProfileItem_License_df])
                 ProfileItem_License_df.to_csv(
-                    job_dat_dir + "\\" + f"{process_datetime}_ProfileItem-License.dat",
+                    job_dat_dir + "\\" + f"ProfileItem-License.dat",
                     header=None,
                     index=None,
                     sep="|",

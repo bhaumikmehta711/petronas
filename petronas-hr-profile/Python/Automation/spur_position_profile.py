@@ -10,9 +10,10 @@ import os
 
 
 def spur_position_profile(
-    skg_name,
     position_blob_dir,
     position_template_file_path,
+    position_profile_df,
+    position_details_file_path,
     spur_data_file_path,
     spur_details_file_path,
     spur_position_file_path,
@@ -31,16 +32,17 @@ def spur_position_profile(
     log = logging.getLogger(__name__)
 
     wb = xw.Book(position_template_file_path)
-    spur_df = pd.read_excel(spur_data_file_path).sort_values("UR_CODE", ascending=True)
-    spur_df = spur_df[~spur_df["UR_CODE"].isin(SPUR_ID_ignore_list)]
-    position_profile_df = pd.read_excel(spur_position_file_path).sort_values("SPUR ID", ascending=True)
-    # remove duplicates
-    position_profile_df = position_profile_df.drop_duplicates()
-    position_profile_df["Pos ID"] = position_profile_df["Pos ID"].astype(str).str.zfill(8)
-    position_profile_obj = position_profile_df.select_dtypes(["object"])
-    position_profile_df[position_profile_obj.columns] = position_profile_obj.apply(lambda x: x.str.strip())
+    # spur_df = pd.read_excel(spur_data_file_path).sort_values("UR_CODE", ascending=True)
+    # spur_df = spur_df[~spur_df["UR_CODE"].isin(SPUR_ID_ignore_list)]
+    # position_profile_df = pd.read_excel(spur_position_file_path).sort_values("SPUR ID", ascending=True)
+    # # remove duplicates
+    # position_profile_df = position_profile_df.drop_duplicates()
+    # position_profile_df["Pos ID"] = position_profile_df["Pos ID"].astype(str).str.zfill(8)
+    # position_profile_obj = position_profile_df.select_dtypes(["object"])
+    # position_profile_df[position_profile_obj.columns] = position_profile_obj.apply(lambda x: x.str.strip())
 
-    experience_df = pd.read_excel(spur_details_file_path, sheet_name="Experience").replace("\n", "<br>", regex=True)
+
+    experience_df = pd.read_excel(position_details_file_path, sheet_name="Experience").replace("\n", "<br>", regex=True)
     experience_df_obj = experience_df.select_dtypes(["object"])
     experience_df[experience_df_obj.columns] = experience_df_obj.apply(lambda x: x.str.strip())
     #experience_df = experience_df.drop(industry_column = None)
@@ -66,7 +68,7 @@ def spur_position_profile(
         x for x in experience_df.columns if re.search("Max Years|Desired Years Of experience", x, flags=re.I)
     ][0]
 
-    degree_df = pd.read_excel(spur_details_file_path, sheet_name="Degree")
+    degree_df = pd.read_excel(position_details_file_path, sheet_name="Degree")
     print(degree_df)
     degree_df_obj = degree_df.select_dtypes(["object"])
     degree_df[degree_df_obj.columns] = degree_df_obj.apply(lambda x: x.str.strip())
@@ -91,10 +93,10 @@ def spur_position_profile(
         else:
             return job_grade
 
-    degree_df = degree_df.dropna(subset=["SPUR ID"])
-    degree_df["JG"] = degree_df["JG"].apply(lambda x: job_grade_map(x))
+    degree_df = degree_df.dropna(subset=["PositionID"])
+    # degree_df["JG"] = degree_df["JG"].apply(lambda x: job_grade_map(x))
 
-    membership_df = pd.read_excel(spur_details_file_path, sheet_name="Membership")
+    membership_df = pd.read_excel(position_details_file_path, sheet_name="Membership")
     membership_df = membership_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
     membership_column = [
         x
@@ -106,7 +108,7 @@ def spur_position_profile(
         )
     ][0]
 
-    awards_df = pd.read_excel(spur_details_file_path, sheet_name="Awards")
+    awards_df = pd.read_excel(position_details_file_path, sheet_name="Awards")
     awards_df = awards_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
     awards_column = [
         x
@@ -118,18 +120,18 @@ def spur_position_profile(
         )
     ][0]
 
-    license_df = pd.read_excel(spur_details_file_path, sheet_name="License")
+    license_df = pd.read_excel(position_details_file_path, sheet_name="License")
     license_df_obj = license_df.select_dtypes(["object"])
     license_df[license_df_obj.columns] = license_df_obj.apply(lambda x: x.str.strip())
     license_column = [x for x in license_df.columns if re.search("License", x, flags=re.I)][0]
 
-    content_item_dict = pd.read_excel(content_item_file_path, sheet_name=None)
-    LC_content_item_list = (
-        content_item_dict["ContentItem-Competency Edge"]
-        .loc[9:, "Content Type Name"]
-        .str.strip()
-        .apply(lambda x: " ".join(str(x).split()))
-    )
+    # content_item_dict = pd.read_excel(content_item_file_path, sheet_name=None)
+    # LC_content_item_list = (
+    #     content_item_dict["ContentItem-Competency Edge"]
+    #     .loc[9:, "Content Type Name"]
+    #     .str.strip()
+    #     .apply(lambda x: " ".join(str(x).split()))
+    # )
     # competency_tec_sheet = [
     #     x for x in content_item_dict.keys() if re.search("ContentItem-Competency$", x, flags=re.I)
     # ][0]
@@ -139,33 +141,33 @@ def spur_position_profile(
     #     .str.strip()
     #     .apply(lambda x: " ".join(str(x).split()))
     # )
-    TC_content_item_list = []
-    degree_sheet = [x for x in content_item_dict.keys() if re.search("^Degree|AreaOfStudy", x, flags=re.I)][0]
-    AreaOfStudy_content_item_list = (
-        content_item_dict[degree_sheet].iloc[1:, 2].str.strip().apply(lambda x: " ".join(x.split()))
-    )
-    membership_content_item_list = (
-        content_item_dict["ContentItem-Membership"]
-        .loc[10:, "Content Type Name"]
-        .str.strip()
-        .apply(lambda x: " ".join(str(x).split()))
-    )
-    awards_content_item_list = (
-        content_item_dict["ContentItem-Honor & Awards"]
-        .loc[10:, "Content Type Name"]
-        .str.strip()
-        .apply(lambda x: " ".join(str(x).split()))
-    )
-    license_content_item_list = (
-        content_item_dict["ContentItem-License & Certif"]
-        .loc[10:, "Content Type Name"]
-        .str.strip()
-        .apply(lambda x: " ".join(str(x).split()))
-    )
+    # TC_content_item_list = []
+    # degree_sheet = [x for x in content_item_dict.keys() if re.search("^Degree|AreaOfStudy", x, flags=re.I)][0]
+    # AreaOfStudy_content_item_list = (
+    #     content_item_dict[degree_sheet].iloc[1:, 2].str.strip().apply(lambda x: " ".join(x.split()))
+    # )
+    # membership_content_item_list = (
+    #     content_item_dict["ContentItem-Membership"]
+    #     .loc[10:, "Content Type Name"]
+    #     .str.strip()
+    #     .apply(lambda x: " ".join(str(x).split()))
+    # )
+    # awards_content_item_list = (
+    #     content_item_dict["ContentItem-Honor & Awards"]
+    #     .loc[10:, "Content Type Name"]
+    #     .str.strip()
+    #     .apply(lambda x: " ".join(str(x).split()))
+    # )
+    # license_content_item_list = (
+    #     content_item_dict["ContentItem-License & Certif"]
+    #     .loc[10:, "Content Type Name"]
+    #     .str.strip()
+    #     .apply(lambda x: " ".join(str(x).split()))
+    # )
 
-    WS_df = pd.read_excel(WS_path, sheet_name="Final for SPUR")
-    WS_PID_list = WS_df.loc[:, "Pos ID (as per ZHPLA 01/11/2021)"].astype(str).apply(lambda x: x.split(".")[0]).str.zfill(8).tolist()
-    log_dir_list = os.listdir(log_dir)
+    # WS_df = pd.read_excel(WS_path, sheet_name="Final for SPUR")
+    # WS_PID_list = WS_df.loc[:, "Pos ID (as per ZHPLA 01/11/2021)"].astype(str).apply(lambda x: x.split(".")[0]).str.zfill(8).tolist()
+    # log_dir_list = os.listdir(log_dir)
 
     def profile_code_map(string):
         """
@@ -218,28 +220,28 @@ def spur_position_profile(
         # Drop competency with minimum proficiency = 0
         header = pd.DataFrame(talent_profile.range("B1:K1").value).T
         talent_profile_df = pd.DataFrame(talent_profile.range("B12:K{}".format(row_end_talent_profile)).value)
-        pid_missing_list = []
-        profile_code_remove_list = []
-        for profile_code in talent_profile_df[2]:
-            pid = re.search("[^_]+$", profile_code).group()
-            if pid not in WS_PID_list:
-                pid_missing_list.append(pid)
-                profile_code_remove_list.append(profile_code)
-        if len(pid_missing_list) != 0:
-            logging.warning("[Data validation] {} PID missing".format(len(pid_missing_list)))
-            with open(log_dir + "\\" + f"{skg_name}_PID_missing.txt", "w") as f:
-                f.write("\n".join("{}) ".format(i) + j for i, j in enumerate(pid_missing_list, start=1)))
-        else:
-            if f"{skg_name}_PID_missing.txt" in log_dir_list:
-                os.remove(log_dir + "\\" + f"{skg_name}_PID_missing.txt")
-        talent_profile_df = talent_profile_df[~talent_profile_df[2].isin(profile_code_remove_list)]
+        # pid_missing_list = []
+        # profile_code_remove_list = []
+        # for profile_code in talent_profile_df[2]:
+        #     pid = re.search("[^_]+$", profile_code).group()
+        #     if pid not in WS_PID_list:
+        #         pid_missing_list.append(pid)
+        #         profile_code_remove_list.append(profile_code)
+        # if len(pid_missing_list) != 0:
+        #     logging.warning("[Data validation] {} PID missing".format(len(pid_missing_list)))
+        #     with open(log_dir + "\\" + f"{skg_name}_PID_missing.txt", "w") as f:
+        #         f.write("\n".join("{}) ".format(i) + j for i, j in enumerate(pid_missing_list, start=1)))
+        # else:
+        #     if f"{skg_name}_PID_missing.txt" in log_dir_list:
+        #         os.remove(log_dir + "\\" + f"{skg_name}_PID_missing.txt")
+        # talent_profile_df = talent_profile_df[~talent_profile_df[2].isin(profile_code_remove_list)]
 
         talent_profile.range((12, "B"), (10000, "K")).clear()
         talent_profile.range((12, "B")).value = talent_profile_df.values.tolist()
         talent_profile_df = pd.concat([header, talent_profile_df])
         # talent_profile_df = talent_profile_df.drop_duplicates(subset=["ProfileCode"])
         talent_profile_df.to_csv(
-            position_dat_dir + "\\" + f"{skg_name}_TalentProfile.dat",
+            position_dat_dir + "\\" + f"TalentProfile.dat",
             header=None,
             index=None,
             sep="|",
@@ -270,7 +272,7 @@ def spur_position_profile(
         profile_relation.range((11, "I")).value = [
             [
                 position_profile_df[position_profile_df["Pos ID"] == str(x).replace("'", "").zfill(8)][
-                    "Company_full_name"
+                    "CompanyName"
                 ].iloc[0]
             ]
             for x in profile_relation.range((11, "H"), (row_end_profile_relation, "H")).value
@@ -305,7 +307,7 @@ def spur_position_profile(
 
         profile_relation_df = pd.concat([header, profile_relation_df])
         profile_relation_df.to_csv(
-            position_dat_dir + "\\" + f"{skg_name}_ProfileRelation.dat",
+            position_dat_dir + "\\" + f"ProfileRelation.dat",
             header=None,
             index=None,
             sep="|",
@@ -313,7 +315,7 @@ def spur_position_profile(
             date_format="%Y/%m/%d",
         )
 
-    def model_profile_info(wb, spur_df, position_dat_dir):
+    def model_profile_info(wb, position_df, position_dat_dir):
         ModelProfileExtraInfo = wb.sheets[2]
         ModelProfileExtraInfo.range((12, "B"), (100000, "I")).clear()
         row_end_talent_profile = wb.sheets[0].range("H" + str(wb.sheets[0].cells.last_cell.row)).end("up").row
@@ -326,7 +328,7 @@ def spur_position_profile(
 
         # Column EFG
         ur_id_list = [
-            re.sub("_.+", "", x) if re.sub("_.+", "", x) in spur_df["UR_CODE"].values.tolist() else ""
+            re.sub("_.+", "", x) if re.sub("_.+", "", x) in position_df["UR_CODE"].values.tolist() else ""
             for x in ModelProfileExtraInfo.range((12, "D")).expand("down").value
         ]
         ur_id_txt_list = [
@@ -335,7 +337,7 @@ def spur_position_profile(
                 x + "_QUALIFICATION.txt",
                 x + "_RESPONSIBILITY.txt",
             ]
-            if x in spur_df["UR_CODE"].values.tolist()
+            if x in position_df["UR_CODE"].values.tolist()
             else ["", "", ""]
             for x in ur_id_list
         ]
@@ -371,7 +373,7 @@ def spur_position_profile(
         # remove ModelProfileExtraInfo duplicates
         # ModelProfileExtraInfo_df = ModelProfileExtraInfo_df.drop_duplicates(subset=None, keep="first")
         ModelProfileExtraInfo_df.to_csv(
-            position_dat_dir + "\\" + f"{skg_name}_ModelProfileExtraInfo.dat",
+            position_dat_dir + "\\" + f"ModelProfileExtraInfo.dat",
             header=None,
             index=None,
             sep="|",
@@ -379,7 +381,7 @@ def spur_position_profile(
             date_format="%Y/%m/%d",
         )
 
-    def profile_attachment(wb, spur_df, position_dat_dir, position_blob_dir):
+    def profile_attachment(wb, position_dat_dir, position_blob_dir):
         ProfileAttachment = wb.sheets[3]
         ProfileAttachment.range((11, "B"), (10000, "K")).clear()
         row_end_talent_profile = wb.sheets[0].range("H" + str(wb.sheets[0].cells.last_cell.row)).end("up").row
@@ -501,7 +503,7 @@ def spur_position_profile(
 
         ProfileAttachment_df = pd.concat([header, ProfileAttachment_df])
         ProfileAttachment_df.to_csv(
-            position_dat_dir + "\\" + f"{skg_name}_ProfileAttachment.dat",
+            position_dat_dir + "\\" + f"ProfileAttachment.dat",
             header=None,
             index=None,
             sep="|",
@@ -580,7 +582,7 @@ def spur_position_profile(
 
         ProfileItem_OtherDescriptor_df = pd.concat([header, ProfileItem_OtherDescriptor_df])
         ProfileItem_OtherDescriptor_df.to_csv(
-            position_dat_dir + "\\" + f"{skg_name}_ProfileItem-OtherDescriptor.dat",
+            position_dat_dir + "\\" + f"ProfileItem-OtherDescriptor.dat",
             header=None,
             index=None,
             sep="|",
@@ -588,7 +590,7 @@ def spur_position_profile(
             date_format="%Y/%m/%d",
         )
 
-    def profile_item_risk(wb, spur_df, position_dat_dir):
+    def profile_item_risk(wb, position_profile_df, position_dat_dir):
         ProfileItem_Risk = wb.sheets[25]
         ProfileItem_Risk.range((12, "B"), (10000, "L")).clear()
         row_end_talent_profile = wb.sheets[0].range("H" + str(wb.sheets[0].cells.last_cell.row)).end("up").row
@@ -615,8 +617,8 @@ def spur_position_profile(
         # Column J
         ProfileItem_Risk.range((12, "J"), (row_end_ProfileItem_Risk, "J")).value = [
             [
-                spur_df[spur_df["UR_CODE"] == re.sub("_.+", "", x)]["CHALLENGES"].values[0].replace("\n", "")
-                if re.sub("_.+", "", x) in spur_df["UR_CODE"].values.tolist()
+                position_profile_df[position_profile_df["UR_CODE"] == re.sub("_.+", "", x)]["Challenge"].values[0].replace("\n", "")
+                if re.sub("_.+", "", x) in position_profile_df["UR_CODE"].values.tolist()
                 else np.nan
             ]
             for x in ProfileItem_Risk.range("G12").expand("down").value
@@ -647,7 +649,7 @@ def spur_position_profile(
 
         ProfileItem_OtherDescriptor_df = pd.concat([header, ProfileItem_Risk_df])
         ProfileItem_OtherDescriptor_df.to_csv(
-            position_dat_dir + "\\" + f"{skg_name}_ProfileItem-Risk.dat",
+            position_dat_dir + "\\" + f"ProfileItem-Risk.dat",
             header=None,
             index=None,
             sep="|",
@@ -974,7 +976,7 @@ def spur_position_profile(
         ProfileItem_ExperienceRequired_df = pd.concat([header, ProfileItem_ExperienceRequired_df])
         # ProfileItem_ExperienceRequired_df = ProfileItem_ExperienceRequired_df.drop_duplicates(subset=[16], keep='first')
         ProfileItem_ExperienceRequired_df.to_csv(
-            position_dat_dir + "\\" + f"{skg_name}_ProfileItem-ExperienceRequired.dat",
+            position_dat_dir + "\\" + f"ProfileItem-ExperienceRequired.dat",
             header=None,
             index=None,
             sep="|",
@@ -1198,7 +1200,7 @@ def spur_position_profile(
 
         ProfileItem_Competency_LC_df = pd.concat([header, ProfileItem_Competency_LC_df])
         ProfileItem_Competency_LC_df.to_csv(
-            position_dat_dir + "\\" + f"{skg_name}_ProfileItem-Competency_LC.dat",
+            position_dat_dir + "\\" + f"ProfileItem-Competency_LC.dat",
             header=None,
             index=None,
             sep="|",
@@ -1552,18 +1554,18 @@ def spur_position_profile(
         for pid in pid_list:
             if all([not re.search(str(pid), x) for x in source_system_id_list]):
                 pid_TC_missing_list.append(str(pid))
-        if len(pid_TC_missing_list) != 0:
-            logging.warning("[Data validation] {} PID have no TC data".format(len(pid_TC_missing_list)))
-            with open(log_dir + "\\" + f"{skg_name}_PID_without_TC.txt", "w") as f:
-                f.write("\n".join("{}) ".format(i) + j for i, j in enumerate(pid_TC_missing_list, start=1)))
-        else:
-            if f"{skg_name}_PID_without_TC.txt" in log_dir_list:
-                os.remove(log_dir + "\\" + f"{skg_name}_PID_without_TC.txt")
+        # if len(pid_TC_missing_list) != 0:
+        #     logging.warning("[Data validation] {} PID have no TC data".format(len(pid_TC_missing_list)))
+        #     with open(log_dir + "\\" + f"PID_without_TC.txt", "w") as f:
+        #         f.write("\n".join("{}) ".format(i) + j for i, j in enumerate(pid_TC_missing_list, start=1)))
+        # else:
+        #     if f"{skg_name}_PID_without_TC.txt" in log_dir_list:
+        #         os.remove(log_dir + "\\" + f"{skg_name}_PID_without_TC.txt")
 
         header = pd.DataFrame(ProfileItem_Competency_TC.range("B2:P2").value).T
         ProfileItem_Competency_TC_df = pd.concat([header, ProfileItem_Competency_TC_df])
         ProfileItem_Competency_TC_df.to_csv(
-            position_dat_dir + "\\" + f"{skg_name}_ProfileItem-Competency_TC.dat",
+            position_dat_dir + "\\" + f"ProfileItem-Competency_TC.dat",
             header=None,
             index=None,
             sep="|",
@@ -1714,7 +1716,7 @@ def spur_position_profile(
 
         ProfileItem_Degree_df = pd.concat([header, ProfileItem_Degree_df])
         ProfileItem_Degree_df.to_csv(
-            position_dat_dir + "\\" + f"{skg_name}_ProfileItem-Degree.dat",
+            position_dat_dir + "\\" + f"ProfileItem-Degree.dat",
             header=None,
             index=None,
             sep="|",
@@ -1786,7 +1788,7 @@ def spur_position_profile(
 
         ProfileItem_Language_df = pd.concat([header, ProfileItem_Language_df])
         ProfileItem_Language_df.to_csv(
-            position_dat_dir + "\\" + f"{skg_name}_ProfileItem-Language.dat",
+            position_dat_dir + "\\" + f"ProfileItem-Language.dat",
             header=None,
             index=None,
             sep="|",
@@ -1940,7 +1942,7 @@ def spur_position_profile(
 
             ProfileItem_Membership_df = pd.concat([header, ProfileItem_Membership_df])
             ProfileItem_Membership_df.to_csv(
-                position_dat_dir + "\\" + f"{skg_name}_ProfileItem-Membership.dat",
+                position_dat_dir + "\\" + f"ProfileItem-Membership.dat",
                 header=None,
                 index=None,
                 sep="|",
@@ -2077,7 +2079,7 @@ def spur_position_profile(
 
             ProfileItem_Awards_df = pd.concat([header, ProfileItem_Awards_df])
             ProfileItem_Awards_df.to_csv(
-                position_dat_dir + "\\" + f"{skg_name}_ProfileItem-Awards.dat",
+                position_dat_dir + "\\" + f"ProfileItem-Awards.dat",
                 header=None,
                 index=None,
                 sep="|",
@@ -2214,7 +2216,7 @@ def spur_position_profile(
 
             ProfileItem_License_df = pd.concat([header, ProfileItem_License_df])
             ProfileItem_License_df.to_csv(
-                position_dat_dir + "\\" + f"{skg_name}_ProfileItem-License.dat",
+                position_dat_dir + "\\" + f"ProfileItem-License.dat",
                 header=None,
                 index=None,
                 sep="|",
