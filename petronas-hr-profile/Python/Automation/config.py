@@ -1,6 +1,6 @@
 storage_account_name = 'adlspetronashrprofiledev'
-storage_account_key = r'PYWB3UZItzWSdTxiRxatVYWypvoc4KQOJb0iKPCDQjM3hlcrbDiACGXO5tKw6TvAWCsT20pQB2Ty+AStgigfPw=='
-sql_connection_string = r'DRIVER={ODBC Driver 18 for SQL Server};SERVER=tcp:sql-petronas-hrprofile-dev.database.windows.net;DATABASE=hrprofile;UID=hradmin;PWD=Microsoft@2024'
+storage_account_key = r''
+sql_connection_string = r''
 
 main_local_dir = r'C:\Users\bhaumikmehta\OneDrive - Microsoft\Desktop\Project\Petronas\Debug'
 # main_local_dir = r'C:\Users\hradmin\hrprofile'
