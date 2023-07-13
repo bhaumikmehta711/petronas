@@ -48,7 +48,7 @@ class data_processor:
         ")
 
         exp_df = sql_read(self.sql_engine, f"SELECT \
-                B.PositionCode [Position ID],\
+                B.PositionCode [PositionID],\
                 CAST(A.MinimumExperienceRequired AS VARCHAR(10)) [mimimumExperienceRequired],\
                 CAST(A.DesiredExperienceRequired AS VARCHAR(10)) [Desired Years Of experience],\
                 A.Industry [Industry],\
@@ -67,6 +67,7 @@ class data_processor:
                 B.DegreeName [ContentItem],\
                 C.StudyAreaName [AreaOfStudy], \
                 D.CountryCode [CountryCode], \
+                CASE WHEN A.Required = 1 THEN \'Y\' ELSE \'N\' END [Required], \
                 '' [if Other (Specific)], \
                 '' [JG],\
                 '' [Importance]\
@@ -79,8 +80,10 @@ class data_processor:
         ")
 
         membership_df = sql_read(self.sql_engine, f"SELECT \
-                C.PositionCode [Position ID],\
+                C.PositionCode [PositionID],\
                 B.MembershipName [Bodies membership Name (e.g. Board of Engineering Malaysia)],\
+                CASE WHEN A.Required = 1 THEN \'Y\' ELSE \'N\' END [Required], \
+                Title [Title], \
                 '' [if Other (Specific)], \
                 '' [JG],\
                 '' [Importance]\
@@ -91,7 +94,7 @@ class data_processor:
         ")
 
         language_df = sql_read(self.sql_engine, f"SELECT \
-                F.PositionCode [Position ID],\
+                F.PositionCode [PositionID],\
                 B.LanguageName [Language],\
                 C.LanguageProficiencyCode ReadingProficiency, \
                 D.LanguageProficiencyCode WritingProficiency, \
@@ -107,9 +110,10 @@ class data_processor:
         ")
 
         awards_df = sql_read(self.sql_engine, f"SELECT \
-                C.PositionCode [Position ID],\
+                C.PositionCode [PositionID],\
                 B.AwardName [Honor & Awards],\
                 '' [if Other (Specific)], \
+                CASE WHEN A.Required = 1 THEN \'Y\' ELSE \'N\' END [Required], \
                 '' [JG],\
                 '' [Importance]\
             FROM [PositionAward] A \
@@ -119,7 +123,7 @@ class data_processor:
         ")
 
         leadership_competency_df = sql_read(self.sql_engine, f"SELECT \
-                E.PositionCode [Position ID],\
+                E.PositionCode [PositionID],\
                 B.LeadershipCompetencyName [Competency],\
                 CAST(ISNULL(C.LeadershipCompetencyProficiencyValue, \'\') AS VARCHAR(10)) MaximumProficiency,\
                 CAST(ISNULL(D.LeadershipCompetencyProficiencyValue, \'\') AS VARCHAR(10)) MinimumProficiency\
@@ -132,7 +136,7 @@ class data_processor:
         ")
 
         technical_competency_df = sql_read(self.sql_engine, f"SELECT \
-                F.PositionCode [Position ID],\
+                F.PositionCode [PositionID],\
                 B.TechnicalCompetencyName [Competency],\
                 CAST(ISNULL(C.TechnicalCompetencyProficiencyValue, \'\') AS VARCHAR(10)) MaximumProficiency,\
                 CAST(ISNULL(D.TechnicalCompetencyProficiencyValue, \'\') AS VARCHAR(10)) MinimumProficiency,\

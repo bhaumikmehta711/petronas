@@ -125,6 +125,11 @@ def spur_position_profile(
     license_df[license_df_obj.columns] = license_df_obj.apply(lambda x: x.str.strip())
     license_column = [x for x in license_df.columns if re.search("License", x, flags=re.I)][0]
 
+    language_df = pd.read_excel(position_details_file_path, sheet_name="Language")
+    language_df_obj = language_df.select_dtypes(["object"])
+    language_df[language_df_obj.columns] = language_df_obj.apply(lambda x: x.str.strip())
+    language_column = [x for x in language_df.columns if re.search("Language", x, flags=re.I)][0]
+
     # content_item_dict = pd.read_excel(content_item_file_path, sheet_name=None)
     # LC_content_item_list = (
     #     content_item_dict["ContentItem-Competency Edge"]
@@ -657,11 +662,10 @@ def spur_position_profile(
             date_format="%Y/%m/%d",
         )
 
-    def profile_item_exp_required(wb, experience_df, position_profile_df, position_dat_dir):
+    def profile_item_exp_required(wb, experience_df, position_dat_dir):
         ProfileItem_ExperienceRequired = wb.sheets[16]
-        ProfileItem_ExperienceRequired.range((12, "B"), (100000, "Q")).clear()
-        spur_id_occ = experience_df["SPUR ID"].value_counts().sort_index()
-        #spur_id_occ = spur_id_occ[spur_id_occ != 1]
+        ProfileItem_ExperienceRequired.range((12, "B"), (10000, "Q")).clear()
+        spur_id_occ = experience_df["profile_code"].value_counts().sort_index()
 
         id_list = []
         exp_importance_list = []
@@ -669,166 +673,21 @@ def spur_position_profile(
         max_exp_list = []
         industry_list = []
         domain_list = []
+        jg_list = []
 
         row_end_talent_profile = wb.sheets[0].range("D" + str(wb.sheets[0].cells.last_cell.row)).end("up").row
-        for row in range(12, row_end_talent_profile + 1):
+        for row in range(14, row_end_talent_profile + 1):
             if wb.sheets[0].range((row, "K")).value == None:
                 break
 
-            ur_id = re.sub("_.+", "", wb.sheets[0].range((row, "K")).value)
-            ur_id_exp_df = experience_df[experience_df["SPUR ID"] == ur_id]
-            position_id = str(re.search("[^_]+$", wb.sheets[0].range((row, "D")).value).group()).zfill(8)
-            role_level_column = [
-                x for x in position_profile_df.columns if re.search("role level|role", x.lower().strip())
-            ][0]
-            role_level = position_profile_df[position_profile_df["Pos ID"] == position_id][role_level_column].values[0]
-            jg_column = [x for x in position_profile_df.columns if "jg" in x.lower()][0]
-            conso_JG = position_profile_df[position_profile_df["Pos ID"] == position_id][jg_column].values[0]
-            # conso_JG = WS_df[WS_df["Pos ID (as per ZHPLA 3/5/2021)"] == position_id]["Conso JG"].iloc[0]
-            conso_JG = re.sub(r"Est.|Eqv.", r"", conso_JG).strip()
+            source_system_id = re.sub("_JOB_PROFILE", "", wb.sheets[0].range((row, "K")).value)
+            # source_system_id = re.sub("CHIEF", "Chief", source_system_id)
+            # print(source_system_id)
 
-            if ur_id in spur_id_occ.index:
-                if all(ur_id_exp_df["JG"].notna()) and any([str(conso_JG) in x for x in ur_id_exp_df["JG"]]):
-                    ur_id_exp_df = ur_id_exp_df.iloc[[conso_JG in x for x in ur_id_exp_df["JG"]]]
-                    data = []
-                    spur_id = ur_id
-                    for field in ur_id_exp_df[industry_column].unique():
-                        if field is np.nan:
-                            min_years = ur_id_exp_df[ur_id_exp_df[industry_column].isna()][min_years_column].min()
-                            max_years = ur_id_exp_df[ur_id_exp_df[industry_column].isna()][max_years_column].max()
-                        else:
-                            min_years = ur_id_exp_df[ur_id_exp_df[industry_column] == field][min_years_column].min()
-                            max_years = ur_id_exp_df[ur_id_exp_df[industry_column] == field][max_years_column].max()
-                        if domain_exist == True:
-                            try:
-                                domain = ur_id_exp_df[ur_id_exp_df[industry_column] == field][domain_column].iloc[0]
-                            except:
-                                domain = ur_id_exp_df[ur_id_exp_df[industry_column].isna()][domain_column].iloc[0]
-                        try:
-                            importance = ur_id_exp_df[ur_id_exp_df[industry_column] == field]["Importance"].iloc[0]
-                        except:
-                            importance = ur_id_exp_df[ur_id_exp_df[industry_column].isna()]["Importance"].iloc[0]
-                        if domain_exist == True:
-                            data.append(
-                                [
-                                    spur_id,
-                                    min_years,
-                                    max_years,
-                                    field,
-                                    domain,
-                                    conso_JG,
-                                    importance,
-                                ]
-                            )
-                        else:
-                            data.append(
-                                [
-                                    spur_id,
-                                    min_years,
-                                    max_years,
-                                    field,
-                                    conso_JG,
-                                    importance,
-                                ]
-                            )
-                    if domain_exist == True:
-                        ur_id_exp_df = pd.DataFrame(
-                            data,
-                            columns=[
-                                "SPUR ID",
-                                min_years_column,
-                                max_years_column,
-                                industry_column,
-                                domain_column,
-                                "JG",
-                                "Importance",
-                            ],
-                        )
-                    else:
-                        ur_id_exp_df = pd.DataFrame(
-                            data,
-                            columns=[
-                                "SPUR ID",
-                                min_years_column,
-                                max_years_column,
-                                industry_column,
-                                "JG",
-                                "Importance",
-                            ],
-                        )
-                    id_list.extend(
-                        [wb.sheets[0].range((row, "K")).get_address(False, False, True)] * len(ur_id_exp_df)
-                    )
-                else:
-                    data = []
-                    spur_id = ur_id
-                    for field in ur_id_exp_df[industry_column].unique():
-                        if field is np.nan:
-                            min_years = ur_id_exp_df[ur_id_exp_df[industry_column].isna()][min_years_column].min()
-                            max_years = ur_id_exp_df[ur_id_exp_df[industry_column].isna()][max_years_column].max()
-                        else:
-                            min_years = ur_id_exp_df[ur_id_exp_df[industry_column] == field][min_years_column].min()
-                            max_years = ur_id_exp_df[ur_id_exp_df[industry_column] == field][max_years_column].max()
-                        if domain_exist == True:
-                            try:
-                                domain = ur_id_exp_df[ur_id_exp_df[industry_column] == field][domain_column].iloc[0]
-                            except:
-                                domain = ur_id_exp_df[ur_id_exp_df[industry_column].isna()][domain_column].iloc[0]
-                        try:
-                            importance = ur_id_exp_df[ur_id_exp_df[industry_column] == field]["Importance"].iloc[0]
-                        except:
-                            importance = ur_id_exp_df[ur_id_exp_df[industry_column].isna()]["Importance"].iloc[0]
-                        if domain_exist == True:
-                            data.append(
-                                [
-                                    spur_id,
-                                    min_years,
-                                    max_years,
-                                    field,
-                                    domain,
-                                    conso_JG,
-                                    importance,
-                                ]
-                            )
-                        else:
-                            data.append(
-                                [
-                                    spur_id,
-                                    min_years,
-                                    max_years,
-                                    field,
-                                    conso_JG,
-                                    importance,
-                                ]
-                            )
-                    if domain_exist == True:
-                        ur_id_exp_df = pd.DataFrame(
-                            data,
-                            columns=[
-                                "SPUR ID",
-                                min_years_column,
-                                max_years_column,
-                                industry_column,
-                                domain_column,
-                                "JG",
-                                "Importance",
-                            ],
-                        )
-                    else:
-                        ur_id_exp_df = pd.DataFrame(
-                            data,
-                            columns=[
-                                "SPUR ID",
-                                min_years_column,
-                                max_years_column,
-                                industry_column,
-                                "JG",
-                                "Importance",
-                            ],
-                        )
-                    id_list.extend(
-                        [wb.sheets[0].range((row, "K")).get_address(False, False, True)] * len(ur_id_exp_df)
-                    )
+            if source_system_id in spur_id_occ.index:
+                id_list.extend(
+                    [wb.sheets[0].range((row, "K")).get_address(False, False, True)] * spur_id_occ[source_system_id]
+                )
 
             else:
                 if run_all == True:
@@ -836,39 +695,34 @@ def spur_position_profile(
                 else:
                     continue
 
-            if ur_id in experience_df["SPUR ID"].values.tolist():
-                if all(ur_id_exp_df["JG"].notna()) and any([conso_JG in x for x in ur_id_exp_df["JG"]]):
-                    exp_importance_list.extend(
-                        ur_id_exp_df[ur_id_exp_df["SPUR ID"] == ur_id][["Importance"]].values.tolist()
+            if source_system_id in experience_df["profile_code"].values.tolist():
+                exp_importance_list.extend(
+                    experience_df[experience_df["profile_code"] == source_system_id][["Importance"]].values.tolist()
+                )
+                min_exp_list.extend(
+                    experience_df[experience_df["profile_code"] == source_system_id][
+                        [min_years_column]
+                    ].values.tolist()
+                )
+                max_exp_list.extend(
+                    experience_df[experience_df["profile_code"] == source_system_id][
+                        [max_years_column]
+                    ].values.tolist()
+                )
+                
+                industry_list.extend(
+
+                    experience_df[experience_df["profile_code"] == source_system_id][[industry_column]].values.tolist()
+                )
+                if domain_exist == True:
+                    domain_list.extend(
+                        experience_df[experience_df["profile_code"] == source_system_id][
+                            [domain_column]
+                        ].values.tolist()
                     )
-                    min_exp_list.extend(ur_id_exp_df[[min_years_column]].values.tolist())
-                    max_exp_list.extend(ur_id_exp_df[[max_years_column]].values.tolist())
-                    industry_list.extend(ur_id_exp_df[[industry_column]].values.tolist())
-                    if domain_exist == True:
-                        domain_list.extend(ur_id_exp_df[[domain_column]].values.tolist())
-                    else:
-                        domain_list.extend(ur_id_exp_df[[industry_column]].values.tolist())
-                else:
-                    exp_importance_list.extend(
-                        ur_id_exp_df[ur_id_exp_df["SPUR ID"] == ur_id][["Importance"]].values.tolist()
-                    )
-                    min_exp_list.extend(
-                        ur_id_exp_df[ur_id_exp_df["SPUR ID"] == ur_id][[min_years_column]].values.tolist()
-                    )
-                    max_exp_list.extend(
-                        ur_id_exp_df[ur_id_exp_df["SPUR ID"] == ur_id][[max_years_column]].values.tolist()
-                    )
-                    industry_list.extend(
-                        ur_id_exp_df[ur_id_exp_df["SPUR ID"] == ur_id][[industry_column]].values.tolist()
-                    )
-                    if domain_exist == True:
-                        domain_list.extend(
-                            ur_id_exp_df[ur_id_exp_df["SPUR ID"] == ur_id][[domain_column]].values.tolist()
-                        )
-                    else:
-                        domain_list.extend(
-                            ur_id_exp_df[ur_id_exp_df["SPUR ID"] == ur_id][[industry_column]].values.tolist()
-                        )
+                jg_list.extend(
+                    experience_df[experience_df["profile_code"] == source_system_id][[exp_jg_column]].values.tolist()
+                )
 
             else:
                 if run_all == True:
@@ -876,7 +730,9 @@ def spur_position_profile(
                     min_exp_list.extend([[""]])
                     max_exp_list.extend([[""]])
                     industry_list.extend([[""]])
-                    domain_list.extend([[""]])
+                    if domain_exist == True:
+                        domain_list.extend([[""]])
+                    jg_list.extend([[""]])
                 else:
                     continue
 
@@ -889,7 +745,7 @@ def spur_position_profile(
         )
 
         # Column J
-        #ProfileItem_ExperienceRequired.range((12, "J")).value = jg_column
+        ProfileItem_ExperienceRequired.range((12, "J")).value = jg_list
 
         # Column L
         ProfileItem_ExperienceRequired.range((12, "L")).value = min_exp_list
@@ -898,23 +754,16 @@ def spur_position_profile(
         ProfileItem_ExperienceRequired.range((12, "M")).value = max_exp_list
 
         # Column N
-        ProfileItem_ExperienceRequired.range((12, "N")).value = domain_list
+        if domain_exist == True:
+            ProfileItem_ExperienceRequired.range((12, "N")).value = domain_list
+        # else:
+        #     ProfileItem_ExperienceRequired.range((12, "N")).value = industry_list
 
         # Column O
         ProfileItem_ExperienceRequired.range((12, "O")).value = industry_list
 
-        # Column F
-        ProfileItem_ExperienceRequired.range(
-            (12, "F"), (row_end_ProfileItem_ExperienceRequired, "F")
-        ).value = "'2021/11/01"
-
-        # Column G
-        ProfileItem_ExperienceRequired.range(
-            (12, "G"), (row_end_ProfileItem_ExperienceRequired, "G")
-        ).value = "'4712/12/31"
-
-        # Column BCDFGIJKP
-        for k in "BCDFGIJKP":
+        # Column BCDFGIKP
+        for k in "BCDFGIKP":
             ProfileItem_ExperienceRequired.range(
                 "{}12:{}{}".format(k, k, row_end_ProfileItem_ExperienceRequired)
             ).value = "={}$11".format(k)
@@ -933,7 +782,7 @@ def spur_position_profile(
         ]
         formula_list = [
             [
-                '=CONCAT(UPPER(SUBSTITUTE({}," ","_")),"_",{},"_",UPPER(SUBSTITUTE({}," ","_")),"_",UPPER(SUBSTITUTE({}, " " , "_")) ,"_PI")'.format(
+                '=CONCAT(UPPER(SUBSTITUTE({}," ","_")),"_",{},"_",UPPER(SUBSTITUTE({}, " ","_")),"_" ,UPPER(SUBSTITUTE({}, " ", "_")),"_PI")'.format(
                     k[0], k[1], k[2], k[3]
                 )
             ]
@@ -943,22 +792,25 @@ def spur_position_profile(
 
         # Drop competency with minimum proficiency = 0
         header = pd.DataFrame(ProfileItem_ExperienceRequired.range("B2:Q2").value).T
-        ProfileItem_ExperienceRequired_df = pd.DataFrame(
-            ProfileItem_ExperienceRequired.range("B12:Q{}".format(row_end_ProfileItem_ExperienceRequired)).value
+        data_range = ProfileItem_ExperienceRequired.range("B12:Q{}".format(row_end_ProfileItem_ExperienceRequired)).value
+        if isinstance(data_range, list) and not isinstance(data_range[0], list):
+            data_range = [data_range]
+        ProfileItem_ExperienceRequired_df = pd.DataFrame(data_range)
+        # duplicated_index = pd.Series()
+        ProfileItem_ExperienceRequired_df = ProfileItem_ExperienceRequired_df.drop_duplicates(
+            subset=[15], keep="first"
         )
         ProfileItem_ExperienceRequired_df[4] = "2021/11/01"
         ProfileItem_ExperienceRequired_df[5] = "4712/12/31"
         ProfileItem_ExperienceRequired_df[[10, 11]] = ProfileItem_ExperienceRequired_df[[10, 11]].apply(
             pd.to_numeric, downcast="signed"
         )
-
         ProfileItem_ExperienceRequired_df[10] = (
             ProfileItem_ExperienceRequired_df[10].fillna(-1).astype(int).replace(-1, "")
         )
         ProfileItem_ExperienceRequired_df[11] = (
             ProfileItem_ExperienceRequired_df[11].fillna(-1).astype(int).replace(-1, "")
         )
-
         ProfileItem_ExperienceRequired.range((12, "B"), (10000, "Q")).clear()
         ProfileItem_ExperienceRequired.range((12, "B")).value = ProfileItem_ExperienceRequired_df.values.tolist()
         row_end_ProfileItem_ExperienceRequired_2 = (
@@ -973,30 +825,27 @@ def spur_position_profile(
             (12, "G"), (row_end_ProfileItem_ExperienceRequired_2, "G")
         ).value = "'4712/12/31"
 
+        for row in range(12, row_end_ProfileItem_ExperienceRequired_2 + 1):
+            if ProfileItem_ExperienceRequired.range((row, "N")).value == None:
+                ProfileItem_ExperienceRequired.range((row, "N")).color = (255, 0, 0)
+            if ProfileItem_ExperienceRequired.range((row, "O")).value == None:
+                ProfileItem_ExperienceRequired.range((row, "O")).color = (255, 0, 0)
+            # if ProfileItem_ExperienceRequired.range((row, "J")).value == None:
+            #     ProfileItem_ExperienceRequired.range((row, "J")).color = (255, 0, 0)
+            if ProfileItem_ExperienceRequired.range((row, "L")).value == None:
+                ProfileItem_ExperienceRequired.range((row, "L")).color = (255, 0, 0)
+            if ProfileItem_ExperienceRequired.range((row, "M")).value == None:
+                ProfileItem_ExperienceRequired.range((row, "M")).color = (255, 0, 0)
+
         ProfileItem_ExperienceRequired_df = pd.concat([header, ProfileItem_ExperienceRequired_df])
-        # ProfileItem_ExperienceRequired_df = ProfileItem_ExperienceRequired_df.drop_duplicates(subset=[16], keep='first')
         ProfileItem_ExperienceRequired_df.to_csv(
-            position_dat_dir + "\\" + f"ProfileItem-ExperienceRequired.dat",
+            job_dat_dir + "\\" + f"ProfileItem-ExperienceRequired.dat",
             header=None,
             index=None,
             sep="|",
             mode="w",
-            date_format="%Y/%m/%d",
+            line_terminator="\n",
         )
-
-        for row in range(12, row_end_ProfileItem_ExperienceRequired + 1):
-            if ProfileItem_ExperienceRequired.range((row, "O")).value == None:
-                # ProfileItem_ExperienceRequired.range((row, 'J')).color = (255, 0, 0)
-                # ProfileItem_ExperienceRequired.range((row, "M")).color = (255, 0, 0)
-                # ProfileItem_ExperienceRequired.range((row, "N")).color = (255, 0, 0)
-                ProfileItem_ExperienceRequired.range((row, "O")).color = (255, 0, 0)
-                # ProfileItem_ExperienceRequired.range((row, "P")).color = (255, 0, 0)
-            if ProfileItem_ExperienceRequired.range((row, "M")).value == None:
-                ProfileItem_ExperienceRequired.range((row, "M")).color = (255, 0, 0)
-            if ProfileItem_ExperienceRequired.range((row, "N")).value == None:
-                ProfileItem_ExperienceRequired.range((row, "N")).color = (255, 0, 0)
-            if ProfileItem_ExperienceRequired.range((row, "P")).value == None:
-                ProfileItem_ExperienceRequired.range((row, "P")).color = (255, 0, 0)
 
     def profile_item_competency_LC(
         wb, LC_file_path, spur_df, position_profile_df, position_dat_dir, LC_content_item_list
@@ -1573,96 +1422,79 @@ def spur_position_profile(
             date_format="%Y/%m/%d",
         )
 
-    def profile_item_degree(wb, degree_df, position_dat_dir, AreaOfStudy_content_item_list):
+    def profile_item_degree(wb, degree_df, position_dat_dir):
         ProfileItem_Degree = wb.sheets[8]
-        ProfileItem_Degree.range((12, "B"), (10000, "R")).clear()
+        ProfileItem_Degree.range((12, "B"), (10000, "Q")).clear()
 
-        spur_id_degree_occ = degree_df["SPUR ID"].value_counts().sort_index()
+        position_id_degree_occ = degree_df["PositionID"].value_counts().sort_index()
 
         degree_id_list = []
         degree_importance_list = []
         edu_level_list = []
         degree_name_list = []
+        country_code_list = []
+        required_list = []
 
         row_end_talent_profile = wb.sheets[0].range("D" + str(wb.sheets[0].cells.last_cell.row)).end("up").row
         for row in range(12, row_end_talent_profile + 1):
             if wb.sheets[0].range((row, "K")).value == None:
                 break
 
-            ur_id = re.sub("_.+", "", wb.sheets[0].range((row, "K")).value)
-            ur_id_degree_df = degree_df[degree_df["SPUR ID"] == ur_id]
-            position_id = str(re.search("[^_]+$", wb.sheets[0].range((row, "D")).value).group()).zfill(8)
-            role_level_column = [
-                x for x in position_profile_df.columns if re.search("role level|role$", x.lower().strip())
-            ][0]
-            role_level = position_profile_df[position_profile_df["Pos ID"] == position_id][role_level_column].values[0]
-            jg_column = [x for x in position_profile_df.columns if "jg" in x.lower()][0]
-            conso_JG = position_profile_df[position_profile_df["Pos ID"] == position_id][jg_column].values[0]
-            # conso_JG = WS_df[WS_df["Pos ID (as per ZHPLA 3/5/2021)"] == position_id]["Conso JG"].iloc[0]
-            conso_JG = re.sub(r"Est.|Eqv.", r"", conso_JG).strip()
+            position_id = wb.sheets[0].range((row, "D")).value
 
-            if ur_id in spur_id_degree_occ.index:
-                if all(ur_id_degree_df["JG"].notna()) and any([str(conso_JG) in x for x in ur_id_degree_df["JG"]]):
-                    ur_id_degree_df = ur_id_degree_df.iloc[[conso_JG in x for x in ur_id_degree_df["JG"]]]
-                    degree_id_list.extend(
-                        [wb.sheets[0].range((row, "K")).get_address(True, False, True)] * len(ur_id_degree_df)
-                    )
-
-                else:
-                    degree_id_list.extend(
-                        [wb.sheets[0].range((row, "K")).get_address(True, False, True)] * spur_id_degree_occ[ur_id]
-                    )
+            if position_id in position_id_degree_occ.index:
+                degree_id_list.extend(
+                    [wb.sheets[0].range((row, "K")).get_address(True, False, True)] * position_id_degree_occ[position_id]
+                )
 
             else:
-                if run_all == True:
-                    degree_id_list.extend([wb.sheets[0].range((row, "K")).get_address(True, False, True)])
-                else:
-                    continue
+                continue
 
-            if ur_id in degree_df["SPUR ID"].values.tolist():
-                if all(ur_id_degree_df["JG"].notna()) and any([str(conso_JG) in x for x in ur_id_degree_df["JG"]]):
-                    degree_importance_list.extend(
-                        ur_id_degree_df[ur_id_degree_df["SPUR ID"] == ur_id][["Importance"]].values.tolist()
-                    )
-                    edu_level_list.extend(
-                        ur_id_degree_df[ur_id_degree_df["SPUR ID"] == ur_id][[degree_column]].values.tolist()
-                    )
-                    degree_name_list.extend(
-                        ur_id_degree_df[ur_id_degree_df["SPUR ID"] == ur_id][[area_of_study_column]].values.tolist()
-                    )
-                else:
-                    degree_importance_list.extend(
-                        degree_df[degree_df["SPUR ID"] == ur_id][["Importance"]].values.tolist()
-                    )
-                    edu_level_list.extend(degree_df[degree_df["SPUR ID"] == ur_id][[degree_column]].values.tolist())
-                    degree_name_list.extend(
-                        degree_df[degree_df["SPUR ID"] == ur_id][[area_of_study_column]].values.tolist()
-                    )
+            if position_id in degree_df["PositionID"].values.tolist():
+                degree_importance_list.extend(degree_df[degree_df["PositionID"] == position_id][["Importance"]].values.tolist())
+                edu_level_list.extend(degree_df[degree_df["PositionID"] == position_id][[degree_column]].values.tolist())
+                degree_name_list.extend(
+                    degree_df[degree_df["PositionID"] == position_id][[area_of_study_column]].values.tolist()
+                )
+                country_code_list.extend(
+                    degree_df[degree_df["PositionID"] == position_id][['CountryCode']].values.tolist()
+                )
+                required_list.extend(
+                    degree_df[degree_df["PositionID"] == position_id][['Required']].values.tolist()
+                )
             else:
                 if run_all == True:
                     degree_importance_list.extend([[""]])
                     edu_level_list.extend([[""]])
                     degree_name_list.extend([[""]])
+                    country_code_list.extend([[""]])
+                    required_list.extend([[""]])
                 else:
                     continue
 
         # Column H
         ProfileItem_Degree.range((12, "H")).value = [["={}".format(k)] for k in degree_id_list]
 
-        # Column K
-        # ProfileItem_Degree.range((12, "K")).value = degree_importance_list
+        # Column J
+        ProfileItem_Degree.range((12, "J")).value = required_list
 
         # Column E
         ProfileItem_Degree.range((12, "E")).value = edu_level_list
 
-        # Column P
-        ProfileItem_Degree.range((12, "P")).value = degree_name_list
+        # Column O
+        ProfileItem_Degree.range((12, "O")).value = degree_name_list
+
+        # Column M
+        ProfileItem_Degree.range((12, "M")).value = country_code_list
+
+        # Column N
+        ProfileItem_Degree.range((12, "N")).value = country_code_list
 
         row_end_degree_sheet = (
             ProfileItem_Degree.range("H" + str(ProfileItem_Degree.cells.last_cell.row)).end("up").row
         )
-        # Column BCDFGIMNOQ
-        for k in "BCDFGIMNOQ":
+        # Column BCDFGILMNP
+        for k in "BCDFGILP":
             ProfileItem_Degree.range("{}12:{}{}".format(k, k, row_end_degree_sheet)).value = "={}$11".format(k)
 
         # Column F
@@ -1671,7 +1503,7 @@ def spur_position_profile(
         # Column G
         ProfileItem_Degree.range((12, "G"), (row_end_degree_sheet, "G")).value = "'4712/12/31"
 
-        # Column R
+        # Column Q
         z_list = [
             (
                 ProfileItem_Degree.range((i, "H"))
@@ -1679,7 +1511,7 @@ def spur_position_profile(
                 .replace("TalentProfile!K", "TalentProfile!D"),
                 ProfileItem_Degree.range((i, "I")).get_address(False, False),
                 ProfileItem_Degree.range((i, "E")).get_address(False, False),
-                ProfileItem_Degree.range((i, "P")).get_address(False, False),
+                ProfileItem_Degree.range((i, "O")).get_address(False, False),
             )
             for i in range(12, row_end_degree_sheet + 1)
         ]
@@ -1691,28 +1523,32 @@ def spur_position_profile(
             ]
             for k in z_list
         ]
-        ProfileItem_Degree.range((12, "R")).value = formula_list
-
-        AreaOfStudy_content_item_list = AreaOfStudy_content_item_list.values.tolist()
-        AreaOfStudy_content_item_list = [x.strip() for x in AreaOfStudy_content_item_list]
-        for row in range(12, row_end_degree_sheet + 1):
-            if not ProfileItem_Degree.range((row, "E")).value in AreaOfStudy_content_item_list:
-                ProfileItem_Degree.range((row, "E")).color = (255, 0, 0)
-            if ProfileItem_Degree.range((row, "K")).value == None:
-                ProfileItem_Degree.range((row, "K")).color = (255, 0, 0)
+        ProfileItem_Degree.range((12, "Q")).value = formula_list
 
         # Drop competency with minimum proficiency = 0
-        header = pd.DataFrame(ProfileItem_Degree.range("B2:R2").value).T
-        ProfileItem_Degree_df = pd.DataFrame(ProfileItem_Degree.range("B12:R{}".format(row_end_degree_sheet)).value)
+        header = pd.DataFrame(ProfileItem_Degree.range("B2:Q2").value).T
+        data_range = ProfileItem_Degree.range("B12:Q{}".format(row_end_degree_sheet)).value
+        if isinstance(data_range, list) and not isinstance(data_range[0], list):
+            data_range = [data_range]
+        ProfileItem_Degree_df = pd.DataFrame(data_range)
         ProfileItem_Degree_df[4] = "2021/11/01"
         ProfileItem_Degree_df[5] = "4712/12/31"
         # ProfileItem_Degree_df[9] = ProfileItem_Degree_df[9].astype(int)
 
-        ProfileItem_Degree.range((12, "B"), (10000, "R")).clear()
+        ProfileItem_Degree.range((12, "B"), (10000, "Q")).clear()
         ProfileItem_Degree.range((12, "B")).value = ProfileItem_Degree_df.values.tolist()
 
         ProfileItem_Degree.range((12, "F"), (row_end_degree_sheet, "F")).value = "'2021/11/01"
         ProfileItem_Degree.range((12, "G"), (row_end_degree_sheet, "G")).value = "'4712/12/31"
+
+        # AreaOfStudy_content_item_list = AreaOfStudy_content_item_list.values.tolist()
+        # AreaOfStudy_content_item_list = [x.strip() for x in AreaOfStudy_content_item_list]
+        # for row in range(12, row_end_degree_sheet + 1):
+        #     if not ProfileItem_Degree.range((row, "O")).value in AreaOfStudy_content_item_list:
+        #         ProfileItem_Degree.range((row, "O")).color = (255, 0, 0)
+            # if ProfileItem_Degree.range((row, "K")).value == None:
+            #     ProfileItem_Degree.range((row, "K")).color = (255, 0, 0)
+            #     ProfileItem_Degree.range((row, "Q")).color = (255, 0, 0)
 
         ProfileItem_Degree_df = pd.concat([header, ProfileItem_Degree_df])
         ProfileItem_Degree_df.to_csv(
@@ -1721,38 +1557,59 @@ def spur_position_profile(
             index=None,
             sep="|",
             mode="w",
-            date_format="%Y/%m/%d",
+            float_format="%.f",
         )
 
-    def profile_item_language(wb, position_dat_dir):
+    def profile_item_language(wb, language_df, position_dat_dir):
         ProfileItem_Language = wb.sheets[12]
         ProfileItem_Language.range((12, "B"), (10000, "R")).clear()
 
+        position_id_language_occ = language_df["PositionID"].value_counts().sort_index()
+        language_id_list = []
+        language_list = []
+        reading_proficiency_list = []
+        writing_proficiency_list = []
+        speaking_proficiency_list = []
+        required_list = []
         row_end_talent_profile = wb.sheets[0].range("D" + str(wb.sheets[0].cells.last_cell.row)).end("up").row
-        h12_language = [
-            wb.sheets[0].range((row, "K")).get_address(True, False, True)
-            for row in range(12, row_end_talent_profile + 1)
-            if wb.sheets[0].range((row, "K")).value != None
-        ]
-        h12_language = [["={}".format(k)] for k in h12_language]
 
-        ProfileItem_Language.range((12, "H")).value = h12_language
+        for row in range(12, row_end_talent_profile + 1):
+            if wb.sheets[0].range((row, "K")).value == None:
+                break
 
-        row_end_language_sheet = (
-            ProfileItem_Language.range("H" + str(ProfileItem_Language.cells.last_cell.row)).end("up").row
-        )
-        # Column BCDFGIJKLMNOPQ
-        for k in "BCDFGIJKLMNOPQ":
+            position_id = wb.sheets[0].range((row, "D")).value
+
+            if position_id in position_id_language_occ.index:
+                language_id_list.extend(
+                    [wb.sheets[0].range((row, "K")).get_address(True, False, True)] * position_id_language_occ[position_id]
+                )
+
+            else:
+                continue
+
+            if position_id in language_df["PositionID"].values.tolist():
+                language_list.extend(language_df[language_df["PositionID"] == position_id][[language_column]].values.tolist())
+                reading_proficiency_list.extend(language_df[language_df["PositionID"] == position_id][['ReadingProficiency']].values.tolist())
+                writing_proficiency_list.extend(language_df[language_df["PositionID"] == position_id][['WritingProficiency']].values.tolist())
+                speaking_proficiency_list.extend(language_df[language_df["PositionID"] == position_id][['SpeakingProficiency']].values.tolist())
+                required_list.extend(language_df[language_df["PositionID"] == position_id][['Required']].values.tolist())
+
+            else:
+                continue
+
+        # Column H
+        ProfileItem_Language.range((12, "H")).value = [["={}".format(k)] for k in language_id_list]
+
+        ProfileItem_Language.range((12, "E")).value = language_list
+        ProfileItem_Language.range((12, "L")).value = reading_proficiency_list
+        ProfileItem_Language.range((12, "N")).value = writing_proficiency_list
+        ProfileItem_Language.range((12, "P")).value = speaking_proficiency_list
+        ProfileItem_Language.range((12, "K")).value = required_list
+
+        row_end_language_sheet = ProfileItem_Language.range("H" + str(wb.sheets[11].cells.last_cell.row)).end("up").row
+        # Column BCDEFGIJKLMNOPQ
+        for k in "BCDFGIJMOQ":
             ProfileItem_Language.range("{}12:{}{}".format(k, k, row_end_language_sheet)).value = "={}$11".format(k)
-
-        # Column E
-        ProfileItem_Language.range((12, "E"), (row_end_language_sheet, "E")).value = "English"
-
-        # Column F
-        ProfileItem_Language.range((12, "F"), (row_end_language_sheet, "F")).value = "'2021/11/01"
-
-        # Column G
-        ProfileItem_Language.range((12, "G"), (row_end_language_sheet, "G")).value = "'4712/12/31"
 
         # Column R
         z_list = [
@@ -1773,9 +1630,10 @@ def spur_position_profile(
 
         # Drop competency with minimum proficiency = 0
         header = pd.DataFrame(ProfileItem_Language.range("B2:R2").value).T
-        ProfileItem_Language_df = pd.DataFrame(
-            ProfileItem_Language.range("B12:R{}".format(row_end_language_sheet)).value
-        )
+        data_range = ProfileItem_Language.range("B12:R{}".format(row_end_language_sheet)).value
+        if isinstance(data_range, list) and not isinstance(data_range[0], list):
+            data_range = [data_range]
+        ProfileItem_Language_df = pd.DataFrame(data_range)
         ProfileItem_Language_df[4] = "2021/11/01"
         ProfileItem_Language_df[5] = "4712/12/31"
         # ProfileItem_Language_df[15] = ProfileItem_Language_df[15].astype(int)
@@ -1787,89 +1645,55 @@ def spur_position_profile(
         ProfileItem_Language.range((12, "G"), (row_end_language_sheet, "G")).value = "'4712/12/31"
 
         ProfileItem_Language_df = pd.concat([header, ProfileItem_Language_df])
+        print(ProfileItem_Language_df)
         ProfileItem_Language_df.to_csv(
             position_dat_dir + "\\" + f"ProfileItem-Language.dat",
             header=None,
             index=None,
             sep="|",
             mode="w",
-            date_format="%Y/%m/%d",
         )
 
     def profile_item_membership(
         wb,
         membership_df,
-        position_profile_df,
-        position_dat_dir,
-        membership_content_item_list,
+        position_dat_dir
     ):
         ProfileItem_Membership = wb.sheets[14]
         ProfileItem_Membership.range((12, "B"), (10000, "N")).clear()
 
-        spur_id_membership_occ = membership_df["SPUR ID"].value_counts().sort_index()
+        position_id_membership_occ = membership_df["PositionID"].value_counts().sort_index()
 
         talent_profile_list = []
         membership_list = []
-        membership_importance_list = []
+        required_list = []
+        title_list = []
 
         row_end_talent_profile = wb.sheets[0].range("D" + str(wb.sheets[0].cells.last_cell.row)).end("up").row
         for row in range(12, row_end_talent_profile + 1):
             if wb.sheets[0].range((row, "K")).value == None:
                 break
 
-            ur_id = re.sub("_.+", "", wb.sheets[0].range((row, "K")).value)
-            ur_id_membership_df = membership_df[membership_df["SPUR ID"] == ur_id]
-            position_id = str(re.search("[^_]+$", wb.sheets[0].range((row, "D")).value).group()).zfill(8)
-            # print(position_id)
-            role_level_column = [
-                x for x in position_profile_df.columns if re.search("role level|role$", x.lower().strip())
-            ][0]
-            # print(role_level_column)
-            # role_level_column = 'Role Level'
-            role_level = position_profile_df[position_profile_df["Pos ID"] == position_id][role_level_column].values[0]
-            jg_column = [x for x in position_profile_df.columns if "jg" in x.lower()][0]
-            conso_JG = position_profile_df[position_profile_df["Pos ID"] == position_id][jg_column].values[0]
-            # conso_JG = WS_df[WS_df["Pos ID (as per ZHPLA 3/5/2021)"] == position_id]["Conso JG"].iloc[0]
-            conso_JG = re.sub(r"Est.|Eqv.", r"", conso_JG).strip()
+            position_id = wb.sheets[0].range((row, "D")).value
 
-            if ur_id in spur_id_membership_occ.index:
-                if all(ur_id_membership_df["JG"].notna()) and any(
-                    [str(conso_JG) in x for x in ur_id_membership_df["JG"]]
-                ):
-                    ur_id_membership_df = ur_id_membership_df.iloc[[conso_JG in x for x in ur_id_membership_df["JG"]]]
-                    talent_profile_list.extend(
-                        [wb.sheets[0].range((row, "K")).get_address(True, False, True)] * len(ur_id_membership_df)
-                    )
-
-                else:
-                    talent_profile_list.extend(
-                        [wb.sheets[0].range((row, "K")).get_address(True, False, True)] * spur_id_membership_occ[ur_id]
-                    )
+            if position_id in position_id_membership_occ.index:
+                talent_profile_list.extend(
+                    [wb.sheets[0].range((row, "K")).get_address(True, False, True)] * position_id_membership_occ[position_id]
+                )
 
             else:
                 continue
 
-            if ur_id in membership_df["SPUR ID"].values.tolist():
-                if all(ur_id_membership_df["JG"].notna()) and any(
-                    [str(conso_JG) in x for x in ur_id_membership_df["JG"]]
-                ):
-                    membership_list.extend(
-                        ur_id_membership_df[ur_id_membership_df["SPUR ID"] == ur_id][
-                            [membership_column]
-                        ].values.tolist()
-                    )
-                    membership_importance_list.extend(
-                        ur_id_membership_df[ur_id_membership_df["SPUR ID"] == ur_id][["Importance"]].values.tolist()
-                    )
-
-                else:
-                    membership_list.extend(
-                        membership_df[membership_df["SPUR ID"] == ur_id][[membership_column]].values.tolist()
-                    )
-                    membership_importance_list.extend(
-                        degree_df[degree_df["SPUR ID"] == ur_id][["Importance"]].values.tolist()
-                    )
-
+            if position_id in membership_df["PositionID"].values.tolist():
+                membership_list.extend(
+                    membership_df[membership_df["PositionID"] == position_id][[membership_column]].values.tolist()
+                )
+                required_list.extend(
+                    membership_df[membership_df["PositionID"] == position_id][['Required']].values.tolist()
+                )
+                title_list.extend(
+                    membership_df[membership_df["PositionID"] == position_id][['Title']].values.tolist()
+                )
             else:
                 continue
 
@@ -1880,22 +1704,21 @@ def spur_position_profile(
             # Column E
             ProfileItem_Membership.range((12, "E")).value = membership_list
 
+            # Column J
+            ProfileItem_Membership.range((12, "J")).value = required_list
+
+            # Column K
+            ProfileItem_Membership.range((12, "K")).value = title_list
+
             row_end_membership_sheet = (
-                ProfileItem_Membership.range("H" + str(ProfileItem_Membership.cells.last_cell.row)).end("up").row
+                ProfileItem_Membership.range("H" + str(wb.sheets[13].cells.last_cell.row)).end("up").row
             )
-            # Column BCDFGIJKLM
-            for k in "BCDIJKLM":
+            # Column BCDFGIM
+            for k in "BCDFGILM":
                 ProfileItem_Membership.range(
                     "{}12:{}{}".format(k, k, row_end_membership_sheet)
                 ).value = "={}$11".format(k)
-
-            # Column F
-            ProfileItem_Membership.range((12, "F"), (row_end_membership_sheet, "F")).value = "'2021/11/01"
-
-            # Column G
-            ProfileItem_Membership.range((12, "G"), (row_end_membership_sheet, "G")).value = "'4712/12/31"
-
-            # Column N
+            # Column M
             z_list = [
                 (
                     ProfileItem_Membership.range((i, "H"))
@@ -1914,27 +1737,28 @@ def spur_position_profile(
                 ]
                 for k in z_list
             ]
-            ProfileItem_Membership.range((12, "N")).value = formula_list
+            ProfileItem_Membership.range((12, "M")).value = formula_list
 
-            membership_content_item_list = membership_content_item_list.values.tolist()
-            for row in range(12, row_end_membership_sheet + 1):
-                if not ProfileItem_Membership.range((row, "E")).value in membership_content_item_list:
-                    ProfileItem_Membership.range((row, "E")).color = (255, 0, 0)
+            # membership_content_item_list = membership_content_item_list.values.tolist()
+            # for row in range(12, row_end_membership_sheet + 1):
+            #     if not ProfileItem_Membership.range((row, "E")).value in membership_content_item_list:
+            #         ProfileItem_Membership.range((row, "E")).color = (255, 0, 0)
 
             # Drop competency with minimum proficiency = 0
-            header = pd.DataFrame(ProfileItem_Membership.range("B2:N2").value).T
-            ProfileItem_Membership_df = pd.DataFrame(
-                ProfileItem_Membership.range("B12:N{}".format(row_end_membership_sheet)).value
-            )
+            header = pd.DataFrame(ProfileItem_Membership.range("B2:M2").value).T
+            data_range = ProfileItem_Membership.range("B12:M{}".format(row_end_membership_sheet)).value
+            if isinstance(data_range, list) and not isinstance(data_range[0], list):
+                data_range = [data_range]
+            ProfileItem_Membership_df = pd.DataFrame(data_range)
             ProfileItem_Membership_df[4] = "2021/11/01"
             ProfileItem_Membership_df[5] = "4712/12/31"
-            # ProfileItem_Membership_df[10] = ProfileItem_Membership_df[10].astype(int)
-            # ProfileItem_Membership_df = ProfileItem_Membership_df.drop_duplicates(subset=[13], keep="first")
+            # ProfileItem_Membership_df[9] = ProfileItem_Membership_df[9].astype(int)
+            ProfileItem_Membership_df = ProfileItem_Membership_df.drop_duplicates(subset=[11], keep="first")
 
-            ProfileItem_Membership.range((12, "B"), (10000, "N")).clear()
+            ProfileItem_Membership.range((12, "B"), (10000, "M")).clear()
             ProfileItem_Membership.range((12, "B")).value = ProfileItem_Membership_df.values.tolist()
             row_end_membership_sheet_2 = (
-                ProfileItem_Membership.range("H" + str(ProfileItem_Membership.cells.last_cell.row)).end("up").row
+                ProfileItem_Membership.range("H" + str(wb.sheets[13].cells.last_cell.row)).end("up").row
             )
 
             ProfileItem_Membership.range((12, "F"), (row_end_membership_sheet_2, "F")).value = "'2021/11/01"
@@ -1947,66 +1771,39 @@ def spur_position_profile(
                 index=None,
                 sep="|",
                 mode="w",
-                date_format="%Y/%m/%d",
             )
 
         else:
             pass
 
-    def profile_item_awards(wb, awards_df, position_profile_df, position_dat_dir, awards_content_item_list):
+    def profile_item_awards(wb, awards_df, position_dat_dir):
         ProfileItem_Awards = wb.sheets[10]
-        ProfileItem_Awards.range((12, "B"), (10000, "O")).clear()
+        ProfileItem_Awards.range((12, "B"), (10000, "N")).clear()
 
-        spur_id_awards_occ = awards_df["SPUR ID"].value_counts().sort_index()
+        position_id_awards_occ = awards_df["PositionID"].value_counts().sort_index()
 
         talent_profile_list = []
         awards_list = []
-        importance_list = []
+        required_list = []
 
         row_end_talent_profile = wb.sheets[0].range("D" + str(wb.sheets[0].cells.last_cell.row)).end("up").row
         for row in range(12, row_end_talent_profile + 1):
             if wb.sheets[0].range((row, "K")).value == None:
                 break
 
-            ur_id = re.sub("_.+", "", wb.sheets[0].range((row, "K")).value)
-            ur_id_awards_df = awards_df[awards_df["SPUR ID"] == ur_id]
-            position_id = str(re.search("[^_]+$", wb.sheets[0].range((row, "D")).value).group()).zfill(8)
-            role_level_column = [
-                x for x in position_profile_df.columns if re.search("role level|role$", x.lower().strip())
-            ][0]
-            role_level = position_profile_df[position_profile_df["Pos ID"] == position_id][role_level_column].values[0]
-            jg_column = [x for x in position_profile_df.columns if "jg" in x.lower()][0]
-            conso_JG = position_profile_df[position_profile_df["Pos ID"] == position_id][jg_column].values[0]
-            # conso_JG = WS_df[WS_df["Pos ID (as per ZHPLA 3/5/2021)"] == position_id]["Conso JG"].iloc[0]
-            conso_JG = re.sub(r"Est.|Eqv.", r"", conso_JG).strip()
+            position_id = wb.sheets[0].range((row, "D")).value
 
-            if ur_id in spur_id_awards_occ.index:
-                if all(ur_id_awards_df["JG"].notna()) and any([str(conso_JG) in x for x in ur_id_awards_df["JG"]]):
-                    ur_id_awards_df = ur_id_awards_df.iloc[[conso_JG in x for x in ur_id_awards_df["JG"]]]
-                    talent_profile_list.extend(
-                        [wb.sheets[0].range((row, "K")).get_address(True, False, True)] * len(ur_id_awards_df)
-                    )
-
-                else:
-                    talent_profile_list.extend(
-                        [wb.sheets[0].range((row, "K")).get_address(True, False, True)] * spur_id_awards_occ[ur_id]
-                    )
+            if position_id in position_id_awards_occ.index:
+                talent_profile_list.extend(
+                    [wb.sheets[0].range((row, "K")).get_address(True, False, True)] * position_id_awards_occ[position_id]
+                )
 
             else:
                 continue
 
-            if ur_id in awards_df["SPUR ID"].values.tolist():
-                if all(ur_id_awards_df["JG"].notna()) and any([str(conso_JG) in x for x in ur_id_awards_df["JG"]]):
-                    awards_list.extend(
-                        ur_id_awards_df[ur_id_awards_df["SPUR ID"] == ur_id][[membership_column]].values.tolist()
-                    )
-                    importance_list.extend(
-                        ur_id_awards_df[ur_id_awards_df["SPUR ID"] == ur_id][["Importance"]].values.tolist()
-                    )
-
-                else:
-                    awards_list.extend(awards_df[awards_df["SPUR ID"] == ur_id][[awards_column]].values.tolist())
-                    importance_list.extend(degree_df[degree_df["SPUR ID"] == ur_id][["Importance"]].values.tolist())
+            if position_id in awards_df["PositionID"].values.tolist():
+                awards_list.extend(awards_df[awards_df["PositionID"] == position_id][["Honor & Awards"]].values.tolist())
+                required_list.extend(awards_df[awards_df["PositionID"] == position_id][["Required"]].values.tolist())
 
             else:
                 continue
@@ -2019,19 +1816,12 @@ def spur_position_profile(
             ProfileItem_Awards.range((12, "E")).value = awards_list
 
             # Column J
-            ProfileItem_Awards.range((12, "J")).value = importance_list
+            ProfileItem_Awards.range((12, "J")).value = required_list
 
-            row_end_awards_sheet = ProfileItem_Awards.range("H" + str(wb.sheets[10].cells.last_cell.row)).end("up").row
-            # Column BCDFGIKMN
-            for k in "BCDFGIKMN":
+            row_end_awards_sheet = ProfileItem_Awards.range("H" + str(wb.sheets[9].cells.last_cell.row)).end("up").row
+            # Column BCDFGIJKM
+            for k in "BCDFGIKLM":
                 ProfileItem_Awards.range("{}12:{}{}".format(k, k, row_end_awards_sheet)).value = "={}$11".format(k)
-
-            # Column F
-            ProfileItem_Awards.range((12, "F"), (row_end_awards_sheet, "F")).value = "'2021/11/01"
-
-            # Column G
-            ProfileItem_Awards.range((12, "G"), (row_end_awards_sheet, "G")).value = "'4712/12/31"
-
             # Column N
             z_list = [
                 (
@@ -2051,27 +1841,28 @@ def spur_position_profile(
                 ]
                 for k in z_list
             ]
-            ProfileItem_Awards.range((12, "O")).value = formula_list
+            ProfileItem_Awards.range((12, "N")).value = formula_list
 
-            awards_content_item_list = awards_content_item_list.values.tolist()
-            for row in range(12, row_end_awards_sheet + 1):
-                if not ProfileItem_Awards.range((row, "E")).value in awards_content_item_list:
-                    ProfileItem_Awards.range((row, "E")).color = (255, 0, 0)
+            # awards_content_item_list = awards_content_item_list.values.tolist()
+            # for row in range(12, row_end_awards_sheet + 1):
+            #     if not ProfileItem_Awards.range((row, "E")).value in awards_content_item_list:
+            #         ProfileItem_Awards.range((row, "E")).color = (255, 0, 0)
 
             # Drop competency with minimum proficiency = 0
-            header = pd.DataFrame(ProfileItem_Awards.range("B2:O2").value).T
-            ProfileItem_Awards_df = pd.DataFrame(
-                ProfileItem_Awards.range("B12:O{}".format(row_end_awards_sheet)).value
-            )
+            header = pd.DataFrame(ProfileItem_Awards.range("B2:N2").value).T
+            data_range = ProfileItem_Awards.range("B12:N{}".format(row_end_awards_sheet)).value
+            if isinstance(data_range, list) and not isinstance(data_range[0], list):
+                data_range = [data_range]
+            ProfileItem_Awards_df = pd.DataFrame(data_range)
             ProfileItem_Awards_df[4] = "2021/11/01"
             ProfileItem_Awards_df[5] = "4712/12/31"
-            ProfileItem_Awards_df[8] = ProfileItem_Awards_df[8].astype(int)
-            # ProfileItem_Awards_df = ProfileItem_Awards_df.drop_duplicates(subset=[12], keep="first")
+            # ProfileItem_Awards_df[8] = ProfileItem_Awards_df[8].astype(int)
+            ProfileItem_Awards_df = ProfileItem_Awards_df.drop_duplicates(subset=[12], keep="first")
 
-            ProfileItem_Awards.range((12, "B"), (10000, "O")).clear()
+            ProfileItem_Awards.range((12, "B"), (10000, "N")).clear()
             ProfileItem_Awards.range((12, "B")).value = ProfileItem_Awards_df.values.tolist()
             row_end_awards_sheet_2 = (
-                ProfileItem_Awards.range("H" + str(ProfileItem_Awards.cells.last_cell.row)).end("up").row
+                ProfileItem_Awards.range("H" + str(wb.sheets[21].cells.last_cell.row)).end("up").row
             )
 
             ProfileItem_Awards.range((12, "F"), (row_end_awards_sheet_2, "F")).value = "'2021/11/01"
@@ -2084,71 +1875,45 @@ def spur_position_profile(
                 index=None,
                 sep="|",
                 mode="w",
-                date_format="%Y/%m/%d",
             )
 
         else:
             pass
 
-    def profile_item_license(wb, license_df, position_profile_df, position_dat_dir, license_content_item_list):
+    def profile_item_license(wb, license_df, position_dat_dir):
         ProfileItem_License = wb.sheets[6]
         ProfileItem_License.range((12, "B"), (10000, "Q")).clear()
 
-        spur_id_license_occ = license_df["SPUR ID"].value_counts().sort_index()
+        position_id_license_occ = license_df["PositionID"].value_counts().sort_index()
 
         talent_profile_list = []
         license_list = []
         importance_list = []
+        required_list = []
+        country_code_list = []
+        state_name_list = []
 
         row_end_talent_profile = wb.sheets[0].range("D" + str(wb.sheets[0].cells.last_cell.row)).end("up").row
         for row in range(12, row_end_talent_profile + 1):
-            if wb.sheets[0].range((row, "K")).value == None:
+            if wb.sheets[0].range((row, "D")).value == None:
                 break
 
-            ur_id = re.sub("_.+", "", wb.sheets[0].range((row, "K")).value)
-            ur_id_license_df = license_df[license_df["SPUR ID"] == ur_id]
-            position_id = str(re.search("[^_]+$", wb.sheets[0].range((row, "D")).value).group()).zfill(8)
-            role_level_column = [
-                x for x in position_profile_df.columns if re.search("role level|role$", x.lower().strip())
-            ][0]
-            role_level = position_profile_df[position_profile_df["Pos ID"] == position_id][role_level_column].values[0]
-            jg_column = [x for x in position_profile_df.columns if "jg" in x.lower()][0]
-            conso_JG = position_profile_df[position_profile_df["Pos ID"] == position_id][jg_column].values[0]
-            # conso_JG = WS_df[WS_df["Pos ID (as per ZHPLA 3/5/2021)"] == position_id]["Conso JG"].iloc[0]
-            conso_JG = re.sub(r"Est.|Eqv.", r"", conso_JG).strip()
+            position_id = wb.sheets[0].range((row, "D")).value
 
-            if ur_id in spur_id_license_occ.index:
-                if all(ur_id_license_df["JG"].notna()) and any([str(conso_JG) in x for x in ur_id_license_df["JG"]]):
-                    ur_id_license_df = ur_id_license_df.iloc[[conso_JG in x for x in ur_id_license_df["JG"]]]
-                    talent_profile_list.extend(
-                        [wb.sheets[0].range((row, "K")).get_address(True, False, True)] * len(ur_id_license_df)
-                    )
-
-                else:
-                    talent_profile_list.extend(
-                        [wb.sheets[0].range((row, "K")).get_address(True, False, True)] * spur_id_license_occ[ur_id]
-                    )
+            if position_id in position_id_license_occ.index:
+                talent_profile_list.extend(
+                    [wb.sheets[0].range((row, "K")).get_address(True, False, True)] * position_id_license_occ[position_id]
+                )
 
             else:
                 continue
 
-            if ur_id in license_df["SPUR ID"].values.tolist():
-                if all(ur_id_license_df["JG"].notna()) and any([str(conso_JG) in x for x in ur_id_license_df["JG"]]):
-                    license_list.extend(
-                        ur_id_license_df[ur_id_license_df["SPUR ID"] == ur_id][[license_column]].values.tolist()
-                    )
-                    importance_list.extend(
-                        ur_id_license_df[ur_id_license_df["SPUR ID"] == ur_id][["Importance"]].values.tolist()
-                    )
-
-                else:
-                    license_list.extend(
-                        ur_id_license_df[ur_id_license_df["SPUR ID"] == ur_id][[license_column]].values.tolist()
-                    )
-                    importance_list.extend(
-                        ur_id_license_df[ur_id_license_df["SPUR ID"] == ur_id][["Importance"]].values.tolist()
-                    )
-
+            if position_id in license_df["PositionID"].values.tolist():
+                license_list.extend(license_df[license_df["PositionID"] == position_id][[license_column]].values.tolist())
+                importance_list.extend(license_df[license_df["PositionID"] == position_id][["Importance"]].values.tolist())
+                required_list.extend(license_df[license_df["PositionID"] == position_id][['Required']].values.tolist())
+                country_code_list.extend(license_df[license_df["PositionID"] == position_id][['Country']].values.tolist())
+                state_name_list.extend(license_df[license_df["PositionID"] == position_id][['State']].values.tolist())
             else:
                 continue
 
@@ -2159,16 +1924,31 @@ def spur_position_profile(
             # Column E
             ProfileItem_License.range((12, "E")).value = license_list
 
+            # Column K
+            ProfileItem_License.range((12, "K")).value = ""
+
             # Column J
-            # ProfileItem_License.range((12, "J")).value = importance_list
+            ProfileItem_License.range((12, "J")).value = required_list
+
+            # Column L
+            ProfileItem_License.range((12, "L")).value = country_code_list
+
+            # Column M
+            ProfileItem_License.range((12, "M")).value = country_code_list
+
+            # Column N
+            ProfileItem_License.range((12, "N")).value = country_code_list
+
+            # Column O
+            ProfileItem_License.range((12, "O")).value = state_name_list
 
             row_end_license_sheet = (
-                ProfileItem_License.range("H" + str(wb.sheets[6].cells.last_cell.row)).end("up").row
+                ProfileItem_License.range("H" + str(wb.sheets[5].cells.last_cell.row)).end("up").row
             )
             # Column BCDFGIJLMNOP
-            for k in "BCDFGIJLMNOP":
+            for k in "BCDFGIP":
                 ProfileItem_License.range("{}12:{}{}".format(k, k, row_end_license_sheet)).value = "={}$11".format(k)
-            # Column M
+            # Column Q
             z_list = [
                 (
                     ProfileItem_License.range((i, "H"))
@@ -2189,30 +1969,31 @@ def spur_position_profile(
             ]
             ProfileItem_License.range((12, "Q")).value = formula_list
 
-            license_content_item_list = license_content_item_list.values.tolist()
+            # license_content_item_list = license_content_item_list.values.tolist()
 
             # Drop competency with minimum proficiency = 0
             header = pd.DataFrame(ProfileItem_License.range("B2:Q2").value).T
-            ProfileItem_License_df = pd.DataFrame(
-                ProfileItem_License.range("B12:Q{}".format(row_end_license_sheet)).value
-            )
+            data_range = ProfileItem_License.range("B12:Q{}".format(row_end_license_sheet)).value
+            if isinstance(data_range, list) and not isinstance(data_range[0], list):
+                data_range = [data_range]
+            ProfileItem_License_df = pd.DataFrame(data_range)
             ProfileItem_License_df[4] = "2021/11/01"
             ProfileItem_License_df[5] = "4712/12/31"
             # ProfileItem_License_df[8] = ProfileItem_License_df[8].astype(int)
-            # ProfileItem_License_df = ProfileItem_License_df.drop_duplicates(subset=[15], keep="first")
+            ProfileItem_License_df = ProfileItem_License_df.drop_duplicates(subset=[15], keep="first")
 
             ProfileItem_License.range((12, "B"), (10000, "Q")).clear()
             ProfileItem_License.range((12, "B")).value = ProfileItem_License_df.values.tolist()
             row_end_license_sheet_2 = (
-                ProfileItem_License.range("H" + str(ProfileItem_License.cells.last_cell.row)).end("up").row
+                ProfileItem_License.range("H" + str(wb.sheets[5].cells.last_cell.row)).end("up").row
             )
 
             ProfileItem_License.range((12, "F"), (row_end_license_sheet_2, "F")).value = "'2021/11/01"
             ProfileItem_License.range((12, "G"), (row_end_license_sheet_2, "G")).value = "'4712/12/31"
 
-            for row in range(12, row_end_license_sheet_2 + 1):
-                if not ProfileItem_License.range((row, "E")).value in license_content_item_list:
-                    ProfileItem_License.range((row, "E")).color = (255, 0, 0)
+            # for row in range(12, row_end_license_sheet_2 + 1):
+            #     if not ProfileItem_License.range((row, "E")).value in license_content_item_list:
+            #         ProfileItem_License.range((row, "E")).color = (255, 0, 0)
 
             ProfileItem_License_df = pd.concat([header, ProfileItem_License_df])
             ProfileItem_License_df.to_csv(
@@ -2234,37 +2015,35 @@ def spur_position_profile(
     profile_relation(wb, position_dat_dir)
 
     log.info("[Position profile] Model Profile Info")
-    model_profile_info(wb, spur_df, position_dat_dir)
+    model_profile_info(wb, position_profile_df, position_dat_dir)
 
     log.info("[Position profile] Profile Attachment")
-    profile_attachment(wb, spur_df, position_dat_dir, position_blob_dir)
+    profile_attachment(wb, position_dat_dir, position_blob_dir)
 
     # log.info("[Position profile] Profile Item Other Descriptor")
     # profile_item_other_descriptor(wb, spur_df, position_dat_dir)
 
     log.info("[Position profile] License & Certificate")
-    profile_item_license(wb, license_df, position_profile_df, position_dat_dir, license_content_item_list)
+    profile_item_license(wb, license_df, position_dat_dir)
 
     log.info("[Position profile] Degree")
-    profile_item_degree(wb, degree_df, position_dat_dir, AreaOfStudy_content_item_list)
+    profile_item_degree(wb, degree_df, position_dat_dir)
 
     log.info("[Position profile] Honors & Awards")
-    profile_item_awards(wb, awards_df, position_profile_df, position_dat_dir, awards_content_item_list)
+    profile_item_awards(wb, awards_df, position_dat_dir)
 
     log.info("[Position profile] Language")
-    profile_item_language(wb, position_dat_dir)
+    profile_item_language(wb, language_df, position_dat_dir)
 
     log.info("[Position profile] Membership")
     profile_item_membership(
         wb,
         membership_df,
-        position_profile_df,
-        position_dat_dir,
-        membership_content_item_list,
+        position_dat_dir
     )
 
     log.info("[Position profile] Experience Required")
-    profile_item_exp_required(wb, experience_df, position_profile_df, position_dat_dir)
+    profile_item_exp_required(wb, experience_df, position_dat_dir)
 
     log.info("[Position profile] Leadership Competency")
     profile_item_competency_LC(wb, LC_file_path, spur_df, position_profile_df, position_dat_dir, LC_content_item_list)

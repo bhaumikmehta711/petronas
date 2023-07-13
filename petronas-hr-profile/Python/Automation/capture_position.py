@@ -64,7 +64,7 @@ for index, position in pd_batch.iterrows():
                 \
                 MERGE [dbo].[Position] A\
                 USING (SELECT \
-                        F.PositionID position_id,\
+                        G.PositionID position_id,\
                         A.maintenance_mode, \
                         CONVERT(DATETIME, effective_start_date, 103) effective_start_date, \
                         CONVERT(DATETIME, effective_end_date, 103) effective_end_date, \
@@ -74,7 +74,7 @@ for index, position in pd_batch.iterrows():
                         A.position_name, \
                         C.JobGradeID job_grade_id, \
                         E.RoleLevelID role_level_id, \
-                        A.company_code, \
+                        F.CompanyID,\
                         B.BatchID, \
                         B.SubmittedBy, \
                         B.SubmittedTimeStamp \
@@ -83,13 +83,14 @@ for index, position in pd_batch.iterrows():
                     INNER JOIN Master.JobGrade C ON C.JobGradeName = A.job_grade\
                     INNER JOIN DBO.SPUR D ON D.SPURCode = A.SPUR_ID\
                     INNER JOIN Master.RoleLevel E ON E.RoleLevelName = A.role_level AND E.RoleLevelID = D.RoleLevelID\
-                    LEFT JOIN dbo.Position F ON F.PositionCode = A.position_profile_code) B\
+                    INNER JOIN Master.Company F ON F.CompanyCode = A.company_code\
+                    LEFT JOIN dbo.Position G ON G.PositionCode = A.position_profile_code) B\
                 ON A.PositionID = B.position_id\
                 WHEN MATCHED THEN\
                 UPDATE SET BatchID = B.BatchID, BackendUserModifiedBy = \'{conf.sql_user}\', BackendUserModifiedTimestamp = GETUTCDATE()\
                 WHEN NOT MATCHED THEN\
-                INSERT (MaintenanceMode, PositionCode, PositionName, EffectiveStartDate, EffectiveEndDate, SPURID, SPURCode, JobGradeID, RoleLevelID, CompanyCode, BatchID, SubmittedTimeStamp, EndUserCreatedBy, EndUserCreatedTimestamp)\
-                VALUES (B.maintenance_mode, B.position_profile_code, B.position_name, B.effective_start_date, B.effective_end_date, B.SPUR_ID, B.SPUR_code, B.job_grade_id, B.role_level_id, B.company_code, B.BatchID, B.SubmittedTimeStamp, B.SubmittedBy, B.SubmittedTimeStamp);\
+                INSERT (MaintenanceMode, PositionCode, PositionName, EffectiveStartDate, EffectiveEndDate, SPURID, SPURCode, JobGradeID, RoleLevelID, BatchID, CompanyID, SubmittedTimeStamp, EndUserCreatedBy, EndUserCreatedTimestamp)\
+                VALUES (B.maintenance_mode, B.position_profile_code, B.position_name, B.effective_start_date, B.effective_end_date, B.SPUR_ID, B.SPUR_code, B.job_grade_id, B.role_level_id, B.BatchID, B.CompanyID, B.SubmittedTimeStamp, B.SubmittedBy, B.SubmittedTimeStamp);\
                 \
                 EXEC [dbo].[uspLoadPosition] @pBatchID = {batch_id}\
                 \

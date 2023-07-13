@@ -94,32 +94,26 @@ if not pd_batch.empty:
                     BackendUserModifiedTimestamp = GETUTCDATE()\
                 WHERE BatchName = \'{batch_name}\'\
                 \
-                MERGE [dbo].[SPUR] A\
-                USING (SELECT \
+                INSERT INTO SPUR (SPURCode, SPURName, BatchID, SPURFilePath, PurposeAndAccountability, Challenge, Experience, KPI, EndUserCreatedBy, SubmittedTimeStamp, EndUserCreatedTimestamp)\
+                SELECT \
                         A.SPUR_code, \
                         A.SPUR_name, \
                         B.BatchID, \
-                        B.SubmittedBy, \
-                        B.SubmittedTimeStamp, \
                         A.SPUR_file_storage_account_path, \
                         A.purpose_and_accountability, \
                         A.challenge, \
+                        A.experience, \
                         A.KPI, \
-                        A.experience \
+                        B.SubmittedBy, \
+                        B.SubmittedTimeStamp, \
+                        B.SubmittedTimeStamp \
                     FROM [Staging].[{batch_name}] A \
-                    INNER JOIN [dbo].[Batch] B ON \'{batch_name}\' = B.BatchName) B\
-                ON 1 != 1\
-                WHEN MATCHED THEN\
-                UPDATE SET BatchID = B.BatchID, BackendUserModifiedBy = \'{conf.sql_user}\', BackendUserModifiedTimestamp = GETUTCDATE()\
-                WHEN NOT MATCHED THEN\
-                INSERT (SPURCode, SPURName, BatchID, SPURFilePath, PurposeAndAccountability, Challenge, Experience, KPI, EndUserCreatedBy, SubmittedTimeStamp, EndUserCreatedTimestamp)\
-                VALUES (B.SPUR_code, B.SPUR_name, B.BatchID, B.SPUR_file_storage_account_path, B.purpose_and_accountability, B.challenge, B.experience, B.KPI, B.SubmittedBy, B.SubmittedTimeStamp, B.SubmittedTimeStamp);\
+                    INNER JOIN [dbo].[Batch] B ON \'{batch_name}\' = B.BatchName\
                 \
                 EXEC [audit].[uspAddEmail] @pBatchID = {batch_id}\
                 \
                 DROP TABLE [Staging].[{batch_name}]'
             sql_execute(engine=sql_engine, query = sql_query)
-
             
         except Exception as e:
             logging.error(f'Encountered error in create_spur.py: {str(e)}')

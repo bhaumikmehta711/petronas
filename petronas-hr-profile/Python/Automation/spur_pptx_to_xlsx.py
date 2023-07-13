@@ -338,7 +338,7 @@ def pptx_to_xlsx(
 
     spur_df = (
         pd.DataFrame({"UR": ur_name_list, "text": text_list, "SOURCE": source_file})
-        .drop_duplicates(subset=["UR"])
+        # .drop_duplicates(subset=["UR"])
         .reset_index(drop=True)
     )
     spur_df["UR_CODE"] = spur_df["UR"].apply(
@@ -381,8 +381,8 @@ def pptx_to_xlsx(
         # .applymap(lambda x: re.sub("^(?=[upol]+>)", "<", x.strip(" \n<br>")) if re.search("^<br>|<br>$", x) else x)
         # .applymap(lambda x: re.sub("(?<=[<upol/])$", ">", x))
         # .applymap(lambda x: re.sub("\.<br>", "<br>", x))
-        .drop_duplicates(subset=["UR_CODE", "ACCOUNTABILITIES"])
-        .pipe(lambda x: x.groupby("UR_CODE").agg("|".join).reset_index(drop=False))
+        # .drop_duplicates(subset=["UR_CODE", "ACCOUNTABILITIES"])
+        # .pipe(lambda x: x.groupby("UR_CODE").agg("|".join).reset_index(drop=False))
     ).applymap(lambda x: "<br>".join(list(dict.fromkeys(x.split("|")))) if "|" in x else x)
     spur_df["UR_NAME"] = spur_df["UR_NAME"].apply(
         lambda x: re.sub("–\s+\(Page.+|–\s+\(\d.+|\(\d/\d.+|<br>.+|\s*\d\/\d.*", "", x, flags=re.S).strip().strip("*")
