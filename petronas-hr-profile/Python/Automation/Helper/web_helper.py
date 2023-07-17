@@ -4,6 +4,6 @@ def post(url, header, payload):
     response = requests.post(
         url = url,
         headers=header,
-        params=payload
+        data=payload
     )
     return response
