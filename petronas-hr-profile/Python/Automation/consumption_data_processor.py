@@ -25,6 +25,9 @@ service_client = DataLakeServiceClient(account_url="{}://{}.dfs.core.windows.net
 mulesoft_api_header = {'client_id': conf.mulesoft_api_client_id, 'client_secret': conf.mulesoft_api_client_secret, 'Content-Type': 'application/json'}
 batch_list = []
 
+remote_path_date= datetime.now().strftime('%Y/%m/%d') 
+Batch_Consumption_Path = 'https://'+conf.storage_account_name+'.blob.core.windows.net/'+conf.consumption_container_name+'/'+remote_path_date
+
 
 #Create dir
 data_dir = consumption_dir + "\\" + "data"
@@ -75,54 +78,56 @@ download_from_adls(
     local_dir = position_dir,
     new_file_name = f'PET_Position_SPUR_{process_datetime}.xlsx')
 
-# #region SPUR
-# #Load approved SPUR
-# sql_execute(sql_engine, f'EXEC uspGetSPURBatchForConsumption @pStagingTableName = \'SPUR_{process_datetime}\'')
 
-# spur_df = sql_read(sql_engine, f'SELECT * FROM [Staging].[SPUR_{process_datetime}]')
+#region SPUR
+#Load approved SPUR
+sql_execute(sql_engine, f'EXEC uspGetSPURBatchForConsumption @pStagingTableName = \'SPUR_{process_datetime}\'')
 
-# if not spur_df.empty:
-#     #Load SPUR staging data
-#     spur_data_processor_sql.data_processor(
-#         consumption_dir=consumption_dir,
-#         process_datetime=process_datetime,
-#         sql_engine = sql_engine
-#     ).spur_data()
-#     job_template_file_path = os.path.abspath(glob.glob(job_dir + "\\" + "*.xlsx")[0])
+spur_df = sql_read(sql_engine, f'SELECT * FROM [Staging].[SPUR_{process_datetime}]')
 
-#     #Create dat files
-#     spur_job_profile.spur_job_profile(
-#             job_template_file_path=job_template_file_path,
-#             spur_df=spur_df,
-#             spur_details_file_path=spur_details_file_path,
-#             job_dat_dir=job_dat_dir,
-#             log_dir=log_dir,
-#         )
-#     os.rename(job_template_file_path, job_template_file_path.replace('_' + process_datetime, ''))
+if not spur_df.empty:
+    #Load SPUR staging data
+    spur_data_processor_sql.data_processor(
+        consumption_dir=consumption_dir,
+        process_datetime=process_datetime,
+        sql_engine = sql_engine
+    ).spur_data()
+    job_template_file_path = os.path.abspath(glob.glob(job_dir + "\\" + "*.xlsx")[0])
+
+    #Create dat files
+    spur_job_profile.spur_job_profile(
+            job_template_file_path=job_template_file_path,
+            spur_df=spur_df,
+            spur_details_file_path=spur_details_file_path,
+            job_dat_dir=job_dat_dir,
+            log_dir=log_dir,
+        )
+    os.rename(job_template_file_path, job_template_file_path.replace('_' + process_datetime, ''))
     
-#     #Create blob files
-#     create_clob_file.create_clob_file(df = spur_df, clob_folder_path = job_clob_dir)
+    #Create blob files
+    create_clob_file.create_clob_file(df = spur_df, clob_folder_path = job_clob_dir)
 
-#     #Upload dat and blob files
-#     uploaded_files = upload_to_adls(
-#             service_client = service_client,
-#             container = conf.consumption_container_name,
-#             local_path = job_dir,
-#             remote_path= datetime.now().strftime('%Y/%m/%d') + '/Job_SPUR'
-#         )
+    #Upload dat and blob files
+    uploaded_files = upload_to_adls(
+            service_client = service_client,
+            container = conf.consumption_container_name,
+            local_path = job_dir,
+            remote_path= datetime.now().strftime('%Y/%m/%d') + '/Job_SPUR'
+        )
     
-#     #Copy clob files
-#     create_blob_file.create_blob_file(service_client = service_client, df = spur_df, destination_remote_path = datetime.now().strftime('%Y/%m/%d') + '/Job_SPUR/BlobFiles')
+    #Copy clob files
+    create_blob_file.create_blob_file(service_client = service_client, df = spur_df, destination_remote_path = datetime.now().strftime('%Y/%m/%d') + '/Job_SPUR/BlobFiles')
 
-# sql_execute(sql_engine, f'UPDATE A\
-#     SET \
-#         A.BatchCompleteStatus = \'Completed\',\
-#         A.BackendUserModifiedBy = \'{conf.sql_user}\',\
-#         A.BackendUserModifiedTimeStamp = GETUTCDATE()\
-#     FROM Batch A\
-#     INNER JOIN Staging.[SPUR_{process_datetime}] B ON A.BatchID = B.BatchID\
-#     DROP TABLE Staging.[SPUR_{process_datetime}]')
-# #endregion
+sql_execute(sql_engine, f'UPDATE A\
+    SET \
+        A.BatchCompleteStatus = \'Completed\',\
+        A.BackendUserModifiedBy = \'{conf.sql_user}\',\
+        A.BackendUserModifiedTimeStamp = GETUTCDATE(),\
+        A.BatchConsumptionPath = \'{Batch_Consumption_Path}\'\
+    FROM Batch A\
+    INNER JOIN Staging.[SPUR_{process_datetime}] B ON A.BatchID = B.BatchID\
+    DROP TABLE Staging.[SPUR_{process_datetime}]')
+#endregion
 
 
 #region Position
@@ -177,14 +182,15 @@ if not position_df.empty:
 
 
 
-# sql_execute(sql_engine, f'UPDATE A\
-#     SET \
-#         A.BatchCompleteStatus = \'Completed\',\
-#         A.BackendUserModifiedBy = \'{conf.sql_user}\',\
-#         A.BackendUserModifiedTimeStamp = GETUTCDATE()\
-#     FROM Batch A\
-#     INNER JOIN (SELECT BatchID FROM Staging.[SPUR_{process_datetime}] UNION SELECT BatchID FROM Staging.[Position_{process_datetime}])  B ON A.BatchID = B.BatchID\
-#     DROP TABLE Staging.[Position_{process_datetime}]')
+sql_execute(sql_engine, f'UPDATE A\
+    SET \
+        A.BatchCompleteStatus = \'Completed\',\
+        A.BackendUserModifiedBy = \'{conf.sql_user}\',\
+        A.BackendUserModifiedTimeStamp = GETUTCDATE(),\
+        A.BatchConsumptionPath = \'{Batch_Consumption_Path}\'\
+    FROM Batch A\
+    INNER JOIN (SELECT BatchID FROM Staging.[SPUR_{process_datetime}] UNION SELECT BatchID FROM Staging.[Position_{process_datetime}])  B ON A.BatchID = B.BatchID\
+    DROP TABLE Staging.[Position_{process_datetime}]')
 
 
 # post(
