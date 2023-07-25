@@ -5,7 +5,7 @@ def create_clob_file(
     for i in range(len(df)):
         # DESCRIPTION
         with open(
-            clob_folder_path + "\\" + df.iloc[i]["UR_CODE"] + "_DESCRIPTION.txt",
+            clob_folder_path + "\\" + df.iloc[i]['ProfileCode'] + "_DESCRIPTION.txt",
             "w",
             encoding="utf-8",
         ) as f:
@@ -13,7 +13,7 @@ def create_clob_file(
         
         # RESPONSIBILITY
         with open(
-            clob_folder_path + "\\" + df.iloc[i]["UR_CODE"] + "_RESPONSIBILITY.txt",
+            clob_folder_path + "\\" + df.iloc[i]['ProfileCode'] + "_RESPONSIBILITY.txt",
             "w",
             encoding="utf-8",
         ) as f:
@@ -21,7 +21,7 @@ def create_clob_file(
         
         # QUALIFICATION
         with open(
-            clob_folder_path + "\\" + df.iloc[i]["UR_CODE"] + "_QUALIFICATION.txt",
+            clob_folder_path + "\\" + df.iloc[i]['ProfileCode'] + "_QUALIFICATION.txt",
             "w",
             encoding="utf-8",
         ) as f:

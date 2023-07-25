@@ -31,123 +31,101 @@ class data_processor:
 
     def position_data(self):
         license_df = sql_read(self.sql_engine, f"SELECT \
-                E.PositionCode [PositionID],\
-                B.LicenseName [License & Certi (e.g. Transportation Management Certificate)],\
-                '' [if Other (Specific)], \
-                '' [JG],\
-                '' [Importance],\
-                C.CountryCode [Country],\
-                D.StateName [State],\
-                CASE WHEN A.Required = 1 THEN \'Y\' ELSE \'N\' END [Required] \
-            FROM [PositionLicense] A \
-            INNER JOIN [Master].[License] B ON A.LicenseID = B.LicenseID\
-            INNER JOIN [Master].[Country] C ON A.CountryID = C.CountryID\
-            INNER JOIN [Master].[State] D ON A.StateID = D.StateID\
-            INNER JOIN [dbo].[Position] E ON E.PositionID = A.PositionID\
-            INNER JOIN [Staging].[Position_{self.process_datetime}] F ON F.PositionID = E.PositionID\
+                A.ProfileCode,\
+                C.LicenseName,\
+                D.CountryCode,\
+                E.StateName,\
+                CASE WHEN B.Required = 1 THEN 'Y' ELSE 'N' END [Required] \
+            FROM [Staging].[Position_{self.process_datetime}] A \
+            INNER JOIN [PositionLicense] B ON B.PositionID = A.PositionID\
+            INNER JOIN [Master].[License] C ON C.LicenseID = B.LicenseID\
+            LEFT JOIN [Master].[Country] D ON D.CountryID = B.CountryID\
+            LEFT JOIN [Master].[State] E ON E.StateID = B.StateID\
         ")
 
         exp_df = sql_read(self.sql_engine, f"SELECT \
-                B.PositionCode [PositionID],\
-                CAST(A.MinimumExperienceRequired AS VARCHAR(10)) [mimimumExperienceRequired],\
-                CAST(A.DesiredExperienceRequired AS VARCHAR(10)) [Desired Years Of experience],\
-                A.Industry [Industry],\
-                A.Domain [Domain],\
-                C.RoleLevelCode [Role Level],\
-                '' [JG],\
-                '' [Importance]\
-            FROM [PositionExperience] A \
-            INNER JOIN [Position] B ON A.PositionID = B.PositionID \
-            INNER JOIN [Master].[RoleLevel] C ON C.RoleLevelID = B.RoleLevelID\
-            INNER JOIN [Staging].[Position_{self.process_datetime}] D ON D.PositionID = B.PositionID\
+                A.ProfileCode,\
+                CAST(B.MinimumExperienceRequired AS VARCHAR(10)) [MimimumExperienceRequired],\
+                CAST(B.DesiredExperienceRequired AS VARCHAR(10)) [MaximumExperienceRequired],\
+                B.Industry [Industry],\
+                B.Domain [Domain],\
+                B.Skill\
+            FROM [Staging].[Position_{self.process_datetime}] A\
+			INNER JOIN [PositionExperience] B ON A.PositionID = B.PositionID\
         ")
 
         degree_df = sql_read(self.sql_engine, f"SELECT \
-                E.PositionCode [PositionID],\
-                B.DegreeName [ContentItem],\
-                C.StudyAreaName [AreaOfStudy], \
-                D.CountryCode [CountryCode], \
-                CASE WHEN A.Required = 1 THEN \'Y\' ELSE \'N\' END [Required], \
-                '' [if Other (Specific)], \
-                '' [JG],\
-                '' [Importance]\
-            FROM [PositionDegree] A \
-            INNER JOIN [Master].[Degree] B ON A.DegreeID = B.DegreeID\
-            INNER JOIN [Master].[StudyArea] C ON C.StudyAreaID = A.StudyAreaID\
-            INNER JOIN [Master].[Country] D ON D.CountryID = A.CountryID\
-            INNER JOIN [dbo].[Position] E ON E.PositionID = A.PositionID\
-            INNER JOIN [Staging].[Position_{self.process_datetime}] F ON F.PositionID = E.PositionID\
+                A.ProfileCode,\
+                C.DegreeName,\
+                D.StudyAreaName, \
+                E.CountryCode,\
+                CASE WHEN B.Required = 1 THEN 'Y' ELSE 'N' END [Required] \
+            FROM [Staging].[Position_{self.process_datetime}] A\
+			INNER JOIN [PositionDegree] B ON B.PositionID = A.PositionID\
+            INNER JOIN [Master].[Degree] C ON C.DegreeID = B.DegreeID\
+            LEFT JOIN [Master].[StudyArea] D ON D.StudyAreaID = B.StudyAreaID\
+            LEFT JOIN [Master].[Country] E ON E.CountryID = B.CountryID\
         ")
 
         membership_df = sql_read(self.sql_engine, f"SELECT \
-                C.PositionCode [PositionID],\
-                B.MembershipName [Bodies membership Name (e.g. Board of Engineering Malaysia)],\
-                CASE WHEN A.Required = 1 THEN \'Y\' ELSE \'N\' END [Required], \
-                Title [Title], \
-                '' [if Other (Specific)], \
-                '' [JG],\
-                '' [Importance]\
-            FROM [PositionMembership] A \
-            INNER JOIN [Master].[Membership] B ON A.MembershipID = B.MembershipID\
-            INNER JOIN [dbo].[Position] C ON C.PositionID = A.PositionID\
-            INNER JOIN [Staging].[Position_{self.process_datetime}] D ON D.PositionID = C.PositionID\
+                A.ProfileCode,\
+                C.MembershipName,\
+                B.Title,\
+                CASE WHEN B.Required = 1 THEN 'Y' ELSE 'N' END Required \
+            FROM [Staging].[Position_{self.process_datetime}] A\
+			INNER JOIN [PositionMembership] B ON B.PositionID = A.PositionID\
+            INNER JOIN [Master].[Membership] C ON C.MembershipID = B.MembershipID\
         ")
 
         language_df = sql_read(self.sql_engine, f"SELECT \
-                F.PositionCode [PositionID],\
-                B.LanguageName [Language],\
-                C.LanguageProficiencyCode ReadingProficiency, \
-                D.LanguageProficiencyCode WritingProficiency, \
-                E.LanguageProficiencyCode SpeakingProficiency, \
-                CASE WHEN A.Required = 1 THEN \'Y\' ELSE \'N\' END Required \
-            FROM [PositionLanguage] A \
-            INNER JOIN [Master].[Language] B ON A.LanguageID = B.LanguageID\
-            INNER JOIN [Master].[LanguageProficiency] C ON C.LanguageProficiencyID = A.ReadingLanguageProficiencyID\
-            INNER JOIN [Master].[LanguageProficiency] D ON D.LanguageProficiencyID = A.WritingLanguageProficiencyID\
-            INNER JOIN [Master].[LanguageProficiency] E ON E.LanguageProficiencyID = A.SpeakingLanguageProficiencyID\
-            INNER JOIN [dbo].[Position] F ON F.PositionID = A.PositionID\
-            INNER JOIN [Staging].[Position_{self.process_datetime}] G ON G.PositionID = F.PositionID\
+                A.ProfileCode,\
+                C.LanguageName,\
+                D.LanguageProficiencyCode ReadingProficiency, \
+                E.LanguageProficiencyCode WritingProficiency, \
+                F.LanguageProficiencyCode SpeakingProficiency, \
+                CASE WHEN B.Required = 1 THEN 'Y' ELSE 'N' END Required \
+            FROM [Staging].[Position_{self.process_datetime}] A\
+			INNER JOIN [PositionLanguage] B ON B.PositionID = A.PositionID\
+            INNER JOIN [Master].[Language] C ON C.LanguageID = B.LanguageID\
+            LEFT JOIN [Master].[LanguageProficiency] D ON D.LanguageProficiencyID = B.ReadingLanguageProficiencyID\
+            LEFT JOIN [Master].[LanguageProficiency] E ON E.LanguageProficiencyID = B.WritingLanguageProficiencyID\
+            LEFT JOIN [Master].[LanguageProficiency] F ON F.LanguageProficiencyID = B.SpeakingLanguageProficiencyID\
         ")
 
         awards_df = sql_read(self.sql_engine, f"SELECT \
-                C.PositionCode [PositionID],\
-                B.AwardName [Honor & Awards],\
-                '' [if Other (Specific)], \
-                CASE WHEN A.Required = 1 THEN \'Y\' ELSE \'N\' END [Required], \
-                '' [JG],\
-                '' [Importance]\
-            FROM [PositionAward] A \
-            INNER JOIN [Master].[Award] B ON A.AwardID = B.AwardID\
-            INNER JOIN [dbo].[Position] C ON C.PositionID = A.PositionID\
-            INNER JOIN [Staging].[Position_{self.process_datetime}] D ON D.PositionID = C.PositionID\
+                A.ProfileCode,\
+                C.AwardName,\
+                CASE WHEN B.Required = 1 THEN 'Y' ELSE 'N' END Required \
+            FROM [Staging].[Position_{self.process_datetime}] A\
+			INNER JOIN [PositionAward] B ON B.PositionID = A.PositionID\
+            INNER JOIN [Master].[Award] C ON C.AwardID = B.AwardID\
         ")
 
         leadership_competency_df = sql_read(self.sql_engine, f"SELECT \
-                E.PositionCode [PositionID],\
-                B.LeadershipCompetencyName [Competency],\
-                CAST(ISNULL(C.LeadershipCompetencyProficiencyValue, \'\') AS VARCHAR(10)) MaximumProficiency,\
-                CAST(ISNULL(D.LeadershipCompetencyProficiencyValue, \'\') AS VARCHAR(10)) MinimumProficiency\
-            FROM [PositionLeadershipCompetency] A \
-            INNER JOIN [Master].[LeadershipCompetency] B ON B.LeadershipCompetencyID = A.LeadershipCompetencyID\
-            INNER JOIN [Master].[LeadershipCompetencyProficiency] C ON C.LeadershipCompetencyProficiencyID = A.MaximumLeadershipCompetencyProficiencyID\
-            INNER JOIN [Master].[LeadershipCompetencyProficiency] D ON D.LeadershipCompetencyProficiencyID = A.MinimumLeadershipCompetencyProficiencyID\
-            INNER JOIN [Position] E ON E.PositionID = A.PositionID\
-            INNER JOIN [Staging].[Position_{self.process_datetime}] F ON F.PositionID = E.PositionID\
+                A.ProfileCode,\
+                C.LeadershipCompetencyName,\
+                CAST(ISNULL(D.LeadershipCompetencyProficiencyValue, '0') AS VARCHAR(10)) MaximumProficiency,\
+                CAST(ISNULL(E.LeadershipCompetencyProficiencyValue, '0') AS VARCHAR(10)) MinimumProficiency\
+            FROM [Staging].[Position_{self.process_datetime}] A\
+			INNER JOIN [PositionLeadershipCompetency] B ON B.PositionID = A.PositionID \
+            INNER JOIN [Master].[LeadershipCompetency] C ON C.LeadershipCompetencyID = B.LeadershipCompetencyID\
+            LEFT JOIN [Master].[LeadershipCompetencyProficiency] D ON D.LeadershipCompetencyProficiencyID = B.MaximumLeadershipCompetencyProficiencyID\
+            LEFT JOIN [Master].[LeadershipCompetencyProficiency] E ON E.LeadershipCompetencyProficiencyID = B.MinimumLeadershipCompetencyProficiencyID\
         ")
 
         technical_competency_df = sql_read(self.sql_engine, f"SELECT \
-                F.PositionCode [PositionID],\
-                B.TechnicalCompetencyName [Competency],\
-                CAST(ISNULL(C.TechnicalCompetencyProficiencyValue, \'\') AS VARCHAR(10)) MaximumProficiency,\
-                CAST(ISNULL(D.TechnicalCompetencyProficiencyValue, \'\') AS VARCHAR(10)) MinimumProficiency,\
-				CAST(ISNULL(E.CompetencyImportanceValue, \'\') AS VARCHAR(10)) Importance\
-            FROM [PositionTechnicalCompetency] A \
-            INNER JOIN [Master].[TechnicalCompetency] B ON B.TechnicalCompetencyID = A.TechnicalCompetencyID\
-            INNER JOIN [Master].[TechnicalCompetencyProficiency] C ON C.TechnicalCompetencyProficiencyID = A.MaximumTechnicalCompetencyProficiencyID\
-            INNER JOIN [Master].[TechnicalCompetencyProficiency] D ON D.TechnicalCompetencyProficiencyID = A.MinimumTechnicalCompetencyProficiencyID\
-			INNER JOIN [Master].[CompetencyImportance] E ON E.CompetencyImportanceID = A.PositionTechnicalCompetencyID\
-            INNER JOIN [Position] F ON F.PositionID = A.PositionID\
-            INNER JOIN [Staging].[Position_{self.process_datetime}] G ON G.PositionID = F.PositionID")
+                A.ProfileCode,\
+                C.TechnicalCompetencyName,\
+                CAST(ISNULL(D.TechnicalCompetencyProficiencyValue, '0') AS VARCHAR(10)) MaximumProficiency,\
+                CAST(ISNULL(E.TechnicalCompetencyProficiencyValue, '0') AS VARCHAR(10)) MinimumProficiency,\
+				CAST(ISNULL(F.CompetencyImportanceValue, '') AS VARCHAR(10)) Importance\
+            FROM [Staging].[Position_{self.process_datetime}] A\
+			INNER JOIN [PositionTechnicalCompetency] B ON B.PositionID = A.PositionID\
+			INNER JOIN [Master].[TechnicalCompetency] C ON C.TechnicalCompetencyID = B.TechnicalCompetencyID\
+            LEFT JOIN [Master].[TechnicalCompetencyProficiency] D ON D.TechnicalCompetencyProficiencyID = B.MaximumTechnicalCompetencyProficiencyID\
+            LEFT JOIN [Master].[TechnicalCompetencyProficiency] E ON E.TechnicalCompetencyProficiencyID = B.MinimumTechnicalCompetencyProficiencyID\
+			LEFT JOIN [Master].[CompetencyImportance] F ON F.CompetencyImportanceID = B.PositionTechnicalCompetencyID"\
+        )
 
         a = [
             (exp_df, "Experience"),

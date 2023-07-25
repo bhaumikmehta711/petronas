@@ -35,13 +35,14 @@ for index, position in pd_batch.iterrows():
         position_writeups = downloaded_files
 
         for position_writeup in position_writeups:
-            pd_writeup = pd.read_excel(position_writeup, sheet_name='Position Profile Maintenance', skiprows=[1], dtype = {'Company Code': str})
+            pd_writeup = pd.read_excel(position_writeup, sheet_name='Position Profile Maintenance', skiprows=[1], dtype = {'Company Code': str, 'Position ID': str})
             for index, position in pd_writeup.iterrows():                
                 current_position = {}
                 current_position['maintenance_mode'] = position['Maintenance Mode']
                 current_position['effective_start_date'] = position['Effective Start Date']
                 current_position['effective_end_date'] = position['Effective End Date']
                 current_position['position_profile_code'] = position['Position Profile Code']
+                current_position['position_code'] = position['Position ID']
                 current_position['SPUR_ID'] = position['SPUR ID']
                 current_position['position_name'] = position['Position Name'] 
                 current_position['job_grade'] = position['Job Grade']
@@ -52,7 +53,7 @@ for index, position in pd_batch.iterrows():
 
         # Merge position in database
         if not pd_position.empty:
-            sql_insert(engine = sql_engine, df = pd_position, table_name = batch_name, schema_name = 'Staging')
+            sql_insert(engine = sql_engine, df = pd_position, table_name = batch_name, schema_name = 'Staging', if_exists='replace')
             sql_query = f'\
                 UPDATE [dbo].[Batch] \
                 SET \
@@ -70,6 +71,7 @@ for index, position in pd_batch.iterrows():
                         CONVERT(DATETIME, effective_end_date, 103) effective_end_date, \
                         A.position_profile_code, \
                         D.SPURCode SPUR_code, \
+                        A.position_code position_code, \
                         D.SPURID SPUR_ID, \
                         A.position_name, \
                         C.JobGradeID job_grade_id, \
@@ -80,17 +82,18 @@ for index, position in pd_batch.iterrows():
                         B.SubmittedTimeStamp \
                     FROM [Staging].[{batch_name}] A \
                     INNER JOIN [dbo].[Batch] B ON \'{batch_name}\' = B.BatchName\
-                    INNER JOIN Master.JobGrade C ON C.JobGradeName = A.job_grade\
-                    INNER JOIN DBO.SPUR D ON D.SPURCode = A.SPUR_ID\
+                    LEFT JOIN Master.JobGrade C ON C.JobGradeName = A.job_grade\
+                    INNER JOIN dbo.SPUR D ON D.SPURCode = A.SPUR_ID AND D.SPURStatus = \'Approved\'\
                     INNER JOIN Master.RoleLevel E ON E.RoleLevelName = A.role_level AND E.RoleLevelID = D.RoleLevelID\
                     INNER JOIN Master.Company F ON F.CompanyCode = A.company_code\
-                    LEFT JOIN dbo.Position G ON G.PositionCode = A.position_profile_code) B\
+                    LEFT JOIN dbo.Position G ON G.PositionProfileCode = A.position_profile_code\
+                    WHERE ISNULL(G.PositionStatus, \'Approved\') = \'Approved\') B\
                 ON A.PositionID = B.position_id\
                 WHEN MATCHED THEN\
-                UPDATE SET BatchID = B.BatchID, BackendUserModifiedBy = \'{conf.sql_user}\', BackendUserModifiedTimestamp = GETUTCDATE()\
+                UPDATE SET MaintenanceMode = B.maintenance_mode, BatchID = B.BatchID, BackendUserModifiedBy = \'{conf.sql_user}\', BackendUserModifiedTimestamp = GETUTCDATE()\
                 WHEN NOT MATCHED THEN\
-                INSERT (MaintenanceMode, PositionCode, PositionName, EffectiveStartDate, EffectiveEndDate, SPURID, SPURCode, JobGradeID, RoleLevelID, BatchID, CompanyID, SubmittedTimeStamp, EndUserCreatedBy, EndUserCreatedTimestamp)\
-                VALUES (B.maintenance_mode, B.position_profile_code, B.position_name, B.effective_start_date, B.effective_end_date, B.SPUR_ID, B.SPUR_code, B.job_grade_id, B.role_level_id, B.BatchID, B.CompanyID, B.SubmittedTimeStamp, B.SubmittedBy, B.SubmittedTimeStamp);\
+                INSERT (MaintenanceMode, PositionProfileCode, PositionName, EffectiveStartDate, EffectiveEndDate, PositionCode, SPURID, SPURCode, JobGradeID, RoleLevelID, BatchID, CompanyID, SubmittedTimeStamp, EndUserCreatedBy, EndUserCreatedTimestamp)\
+                VALUES (B.maintenance_mode, B.position_profile_code, B.position_name, B.effective_start_date, B.effective_end_date, B.position_code, B.SPUR_ID, B.SPUR_code, B.job_grade_id, B.role_level_id, B.BatchID, B.CompanyID, B.SubmittedTimeStamp, B.SubmittedBy, B.SubmittedTimeStamp);\
                 \
                 EXEC [dbo].[uspLoadPosition] @pBatchID = {batch_id}\
                 \
