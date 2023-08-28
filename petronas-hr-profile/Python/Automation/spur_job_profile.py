@@ -2,22 +2,17 @@ import pandas as pd
 import numpy as np
 import re
 import xlwings as xw
-import logging
-import os
-
+from config import *
 
 def spur_job_profile(
     job_template_file_path,
     spur_df,
     spur_details_file_path,
-    job_dat_dir,
-    log_dir,
+    job_dat_dir
 ):
     try:
 
         run_all = False
-
-        log = logging.getLogger(__name__)
 
         wb = xw.Book(job_template_file_path)
 
@@ -216,19 +211,19 @@ def spur_job_profile(
             # Column E
             ModelProfileExtraInfo.range("E14:E{}".format(row_end)).value = [
                 [x + "_DESCRIPTION.txt"]
-                for x in ModelProfileExtraInfo.range("D14:D{}".format(row_end)).value
+                for x in ModelProfileExtraInfo.range("D14:D{}".format(row_end)).options(ndim=1).value
             ]
 
             # Column F
             ModelProfileExtraInfo.range("F14:F{}".format(row_end)).value = [
                 [x + "_QUALIFICATION.txt"]
-                for x in ModelProfileExtraInfo.range("D14:D{}".format(row_end)).value
+                for x in ModelProfileExtraInfo.range("D14:D{}".format(row_end)).options(ndim=1).value
             ]
 
             # Column G
             ModelProfileExtraInfo.range("G14:G{}".format(row_end)).value = [
                 [x + "_RESPONSIBILITY.txt"]
-                for x in ModelProfileExtraInfo.range("D14:D{}".format(row_end)).value
+                for x in ModelProfileExtraInfo.range("D14:D{}".format(row_end)).options(ndim=1).value
             ]
 
             # SourceSystemId
@@ -269,7 +264,7 @@ def spur_job_profile(
 
             # Column E
             ProfileAttachment.range("E14:E{}".format(row_end)).value = [
-                [x + ".pdf"] for x in wb.sheets[0].range("D14:D{}".format(row_end)).value
+                [x + '_' + x.split('_')[0] + ".pdf"] for x in wb.sheets[0].range("D14:D{}".format(row_end)).options(ndim=1).value
             ]
 
             # Column H
@@ -330,7 +325,7 @@ def spur_job_profile(
                     .values[0]
                     .replace("\n", "")
                 ]
-                for x in ProfileItem_OtherDescriptor.range("H12").expand("down").value
+                for x in ProfileItem_OtherDescriptor.range("H12").expand("down").options(ndim=1).value
             ]
 
             # Drop competency with minimum proficiency = 0
@@ -390,7 +385,7 @@ def spur_job_profile(
                     .values[0]
                     .replace("\n", "")
                 ]
-                for x in ProfileItem_Risk.range("G12").expand("down").value
+                for x in ProfileItem_Risk.range("G12").expand("down").options(ndim=1).value
             ]
 
             # Drop competency with minimum proficiency = 0
@@ -786,6 +781,8 @@ def spur_job_profile(
             edu_level_list = []
             degree_name_list = []
             country_code_list = []
+            major_list = []
+            school_list = []
 
             row_end_talent_profile = wb.sheets[0].range("D" + str(wb.sheets[0].cells.last_cell.row)).end("up").row
             for row in range(14, row_end_talent_profile + 1):
@@ -814,19 +811,30 @@ def spur_job_profile(
                     country_code_list.extend(
                         degree_df[degree_df["ProfileCode"] == profile_code][['CountryCode']].values.tolist()
                     )
+                    major_list.extend(
+                        degree_df[degree_df["ProfileCode"] == profile_code][['Major']].values.tolist()
+                    )
+                    school_list.extend(
+                        degree_df[degree_df["ProfileCode"] == profile_code][['School']].values.tolist()
+                    )
                 else:
                     if run_all == True:
                         edu_level_list.extend([[""]])
                         degree_name_list.extend([[""]])
                         country_code_list.extend([[""]])
+                        major_list.extend([[""]])
+                        school_list.extend([[""]])
                     else:
                         continue
 
             # Column H
             ProfileItem_Degree.range((12, "H")).value = [["={}".format(k)] for k in degree_id_list]
 
+            # Column J
+            ProfileItem_Degree.range((12, "J")).value = major_list
+
             # Column K
-            # ProfileItem_Degree.range((12, "K")).value = degree_importance_list
+            ProfileItem_Degree.range((12, "K")).value = school_list
 
             # Column E
             ProfileItem_Degree.range((12, "E")).value = edu_level_list
@@ -991,6 +999,7 @@ def spur_job_profile(
 
             talent_profile_list = []
             membership_list = []
+            title_list = []
 
             row_end_talent_profile = wb.sheets[0].range("D" + str(wb.sheets[0].cells.last_cell.row)).end("up").row
             for row in range(14, row_end_talent_profile + 1):
@@ -1011,6 +1020,9 @@ def spur_job_profile(
                     membership_list.extend(
                         membership_df[membership_df["ProfileCode"] == profile_code][['MembershipName']].values.tolist()
                     )
+                    title_list.extend(
+                        membership_df[membership_df["ProfileCode"] == profile_code][['Title']].values.tolist()
+                    )
 
                 else:
                     continue
@@ -1018,6 +1030,9 @@ def spur_job_profile(
             if membership_list != []:
                 # Column H
                 ProfileItem_Membership.range((12, "H")).value = [["={}".format(k)] for k in talent_profile_list]
+
+                # Column J
+                ProfileItem_Membership.range((12, "J")).value = title_list
 
                 # Column E
                 ProfileItem_Membership.range((12, "E")).value = membership_list
@@ -1027,7 +1042,7 @@ def spur_job_profile(
                 )
 
                 # Column BCDFGIJKL
-                for k in "BCDFGIJKL":
+                for k in "BCDFGIKL":
                     ProfileItem_Membership.range(
                         "{}12:{}{}".format(k, k, row_end_membership_sheet)
                     ).value = "={}$11".format(k)
@@ -1080,6 +1095,7 @@ def spur_job_profile(
 
             talent_profile_list = []
             awards_list = []
+            required_list = []
 
             row_end_talent_profile = wb.sheets[0].range("D" + str(wb.sheets[0].cells.last_cell.row)).end("up").row
             for row in range(14, row_end_talent_profile + 1):
@@ -1098,6 +1114,7 @@ def spur_job_profile(
 
                 if profile_code in awards_df["ProfileCode"].values.tolist():
                     awards_list.extend(awards_df[awards_df["ProfileCode"] == profile_code][["AwardName"]].values.tolist())
+                    required_list.extend(awards_df[awards_df["ProfileCode"] == profile_code][["Required"]].values.tolist())
                 else:
                     continue
 
@@ -1109,11 +1126,11 @@ def spur_job_profile(
                 ProfileItem_Awards.range((12, "E")).value = awards_list
 
                 # Column J
-                # ProfileItem_Awards.range((12, "J")).value = importance_list
+                ProfileItem_Awards.range((12, "J")).value = required_list
 
                 row_end_awards_sheet = ProfileItem_Awards.range("H" + str(wb.sheets[9].cells.last_cell.row)).end("up").row
                 # Column BCDFGIJKM
-                for k in "BCDFGIJKLM":
+                for k in "BCDFGIKL":
                     ProfileItem_Awards.range("{}12:{}{}".format(k, k, row_end_awards_sheet)).value = "={}$11".format(k)
                 # Column N
                 z_list = [
@@ -1134,7 +1151,7 @@ def spur_job_profile(
                     ]
                     for k in z_list
                 ]
-                ProfileItem_Awards.range((12, "N")).value = formula_list
+                ProfileItem_Awards.range((12, "M")).value = formula_list
 
                 header = pd.DataFrame(ProfileItem_Awards.range("B2:N2").value).T
                 data_range = ProfileItem_Awards.range("B12:N{}".format(row_end_awards_sheet)).value
@@ -1169,6 +1186,7 @@ def spur_job_profile(
             required_list = []
             country_code_list = []
             state_name_list = []
+            title_list = []
 
             row_end_talent_profile = wb.sheets[0].range("D" + str(wb.sheets[0].cells.last_cell.row)).end("up").row
             for row in range(14, row_end_talent_profile + 1):
@@ -1190,6 +1208,7 @@ def spur_job_profile(
                     required_list.extend(license_df[license_df["ProfileCode"] == profile_code][['Required']].values.tolist())
                     country_code_list.extend(license_df[license_df["ProfileCode"] == profile_code][['CountryCode']].values.tolist())
                     state_name_list.extend(license_df[license_df["ProfileCode"] == profile_code][['StateName']].values.tolist())
+                    title_list.extend(license_df[license_df["ProfileCode"] == profile_code][['Title']].values.tolist())
                 else:
                     continue
 
@@ -1201,7 +1220,7 @@ def spur_job_profile(
                 ProfileItem_License.range((12, "E")).value = license_list
 
                 # Column K
-                ProfileItem_License.range((12, "K")).value = ""
+                ProfileItem_License.range((12, "K")).value = title_list
 
                 # Column J
                 ProfileItem_License.range((12, "J")).value = required_list
@@ -1271,48 +1290,47 @@ def spur_job_profile(
                 pass
 
         # Execute functions
-        log.info("[Job profile] Talent Profile")
         talent_profile(wb, spur_df, job_dat_dir)
+        LOGGER.info("Completed [Job profile] Talent Profile.")
 
-        log.info("[Job profile] Profile Relation")
         profile_relation(wb, spur_df, job_dat_dir)
+        LOGGER.info("Completed [Job profile] Profile Relation.")
 
-        log.info("[Job profile] Model Profile Info")
         model_profile_info(wb, job_dat_dir)
+        LOGGER.info("Completed [Job profile] Model Profile Info.")
 
-        log.info("[Job profile] Profile Attachment")
         profile_attachment(wb, job_dat_dir)
+        LOGGER.info("Completed [Job profile] Profile Attachment.")
 
         # log.info("[Job profile] Profile Item Other Descriptor")
         # profile_item_other_descriptor(wb, spur_df, job_dat_dir)
 
-        log.info("[Job profile] License & Certificate")
         profile_item_license(wb, license_df, job_dat_dir)
+        LOGGER.info("Completed [Job profile] License & Certificate.")
 
-        log.info("[Job profile] Degree")
         profile_item_degree(wb, degree_df, job_dat_dir)
+        LOGGER.info("Completed [Job profile] Degree.")
 
-        log.info("[Job profile] Honors & Awards")
         profile_item_awards(wb, awards_df, job_dat_dir)
+        LOGGER.info("Completed [Job profile] Honors & Awards.")
 
-        log.info("[Job profile] Language")
         profile_item_language(wb, language_df, job_dat_dir)
+        LOGGER.info("Completed [Job profile] Language.")
 
-        log.info("[Job profile] Membership")
         profile_item_membership(wb, membership_df, job_dat_dir)
+        LOGGER.info("Completed [Job profile] Membership.")
 
-        log.info("[Job profile] Experience Required")
         profile_item_exp_required(wb, experience_df, job_dat_dir)
+        LOGGER.info("Completed [Job profile] Experience Required.")
 
-        log.info("[Job profile] Leadership Competency")
         profile_item_competency_LC(wb, leadership_competency_df, job_dat_dir)
+        LOGGER.info("Completed [Job profile] Leadership Competency.")
 
-        log.info("[Job profile] Technical Competency")
         profile_item_competency_TC(wb, technical_competency_df, job_dat_dir)
+        LOGGER.info("Completed [Job profile] Technical Competency.")
 
-        log.info("[Job profile] Profile Item Risk")
         profile_item_risk(wb, spur_df, job_dat_dir)
-
+        LOGGER.info("Completed [Job profile] Profile Item Risk.")
     except Exception as e:
         raise ValueError(e)
     finally:
